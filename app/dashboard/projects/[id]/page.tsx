@@ -76,10 +76,10 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
         {userRole === "teacher" && (
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href={`/dashboard/projects/${project.id}/edit`}>Edit Project</Link>
+              <Link href={`/dashboard/projects/${project.id}/edit`}>Editer le Project</Link>
             </Button>
             <Button>
-              <Link href={`/dashboard/projects/${project.id}/grade`}>Grade Project</Link>
+              <Link href={`/dashboard/projects/${project.id}/grade`}>Projet Gradle</Link>
             </Button>
           </div>
         )}
@@ -100,7 +100,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">Progrès</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -112,7 +112,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Teacher</CardTitle>
+            <CardTitle className="text-sm font-medium">Professeur</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
             <h2 className="text-xl font-semibold">Deliverables</h2>
             {userRole === "teacher" && (
               <Button asChild>
-                <Link href={`/dashboard/projects/${project.id}/deliverables/new`}>Add Deliverable</Link>
+                <Link href={`/dashboard/projects/${project.id}/deliverables/new`}>Ajouter un livrable</Link>
               </Button>
             )}
           </div>
@@ -189,7 +189,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/dashboard/projects/${project.id}/deliverables/${deliverable.id}`}>
-                        View Details
+                        Voir détails
                       </Link>
                     </Button>
                     {userRole === "student" && deliverable.status !== "Completed" && (
@@ -245,7 +245,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
             <h2 className="text-xl font-semibold">Reports</h2>
             {userRole === "teacher" && (
               <Button asChild>
-                <Link href={`/dashboard/projects/${project.id}/reports/configure`}>Configure Reports</Link>
+                <Link href={`/dashboard/projects/${project.id}/reports/configure`}>Configurer les rapports</Link>
               </Button>
             )}
           </div>
@@ -269,7 +269,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                 </div>
                 <Button asChild>
                   <Link href={`/dashboard/projects/${project.id}/reports/edit`}>
-                    {userRole === "student" ? "Edit Report" : "View Reports"}
+                    {userRole === "student" ? "Editer le rapport" : "Voir le rapport"}
                   </Link>
                 </Button>
               </div>
@@ -279,18 +279,18 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
 
         <TabsContent value="schedule" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Presentation Schedule</h2>
+            <h2 className="text-xl font-semibold">Planing des présentations</h2>
             {userRole === "teacher" && (
               <Button asChild>
-                <Link href={`/dashboard/projects/${project.id}/schedule/manage`}>Manage Schedule</Link>
+                <Link href={`/dashboard/projects/${project.id}/schedule/manage`}>Gérer les plannings</Link>
               </Button>
             )}
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Final Presentations</CardTitle>
-              <CardDescription>May 25-26, 2025</CardDescription>
+              <CardTitle>Présentation finale</CardTitle>
+              <CardDescription>25-26 mai 2025</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -299,8 +299,8 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-slate-500" />
                       <div>
-                        <div className="font-medium">Group A</div>
-                        <div className="text-sm text-slate-500">May 25, 2025 - 10:00 AM</div>
+                        <div className="font-medium">Groupe A</div>
+                        <div className="text-sm text-slate-500">25 mai 2025 - 10:00</div>
                       </div>
                     </div>
                     <Badge>30 minutes</Badge>
@@ -310,8 +310,8 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-slate-500" />
                       <div>
-                        <div className="font-medium">Group B</div>
-                        <div className="text-sm text-slate-500">May 25, 2025 - 10:30 AM</div>
+                        <div className="font-medium">Groupe B</div>
+                        <div className="text-sm text-slate-500">25 mai 2025 - 10:30</div>
                       </div>
                     </div>
                     <Badge>30 minutes</Badge>
@@ -319,7 +319,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <Button variant="outline" asChild>
-                  <Link href={`/dashboard/projects/${project.id}/schedule/download`}>Download Schedule</Link>
+                  <Link href={`/dashboard/projects/${project.id}/schedule/download`}>Télécharger l'agenda</Link>
                 </Button>
               </div>
             </CardContent>

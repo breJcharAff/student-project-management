@@ -11,7 +11,7 @@ export default function Home() {
             <h1 className="text-2xl font-bold">ProjectHub</h1>
             <div className="flex gap-4">
               <Link href="/login">
-                <Button variant="outline">Login</Button>
+                <Button variant="outline">Connexion</Button>
               </Link>
             </div>
           </div>
@@ -20,15 +20,14 @@ export default function Home() {
         <main className="flex-1">
           <section className="bg-gradient-to-r from-slate-100 to-slate-200 py-20">
             <div className="container mx-auto px-4 text-center">
-              <h2 className="text-4xl font-bold mb-6">Student Project Management System</h2>
+              <h2 className="text-4xl font-bold mb-6">Système de gestion de projets étudiants</h2>
               <p className="text-xl mb-8 max-w-2xl mx-auto">
-                A comprehensive platform for teachers to manage student projects and for students to collaborate and
-                submit their work.
+                Une plateforme complète pour que les enseignants gèrent les projets étudiants et que les étudiants collaborent et soumettent leur travail.
               </p>
               <div className="flex justify-center gap-4">
                 <Link href="/login">
                   <Button size="lg">
-                    Get Started
+                    Commencer
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -38,27 +37,27 @@ export default function Home() {
 
           <section className="py-16 bg-white">
             <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold mb-12 text-center">Key Features</h2>
+              <h2 className="text-3xl font-bold mb-12 text-center">Fonctionnalités clés</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <FeatureCard
                     icon={<Users className="h-10 w-10" />}
-                    title="Group Management"
-                    description="Create and manage student groups with flexible configuration options."
+                    title="Gestion des groupes"
+                    description="Créez et gérez des groupes d'étudiants avec des options de configuration flexibles."
                 />
                 <FeatureCard
                     icon={<FileText className="h-10 w-10" />}
-                    title="Deliverable Tracking"
-                    description="Set up deliverables with deadlines and automatic verification."
+                    title="Suivi des livrables"
+                    description="Définissez les livrables avec des échéances et une vérification automatique."
                 />
                 <FeatureCard
                     icon={<BookOpen className="h-10 w-10" />}
-                    title="Online Reports"
-                    description="Students can write reports online with a rich text editor."
+                    title="Rapports en ligne"
+                    description="Les étudiants peuvent rédiger des rapports en ligne avec un éditeur de texte enrichi."
                 />
                 <FeatureCard
                     icon={<Calendar className="h-10 w-10" />}
-                    title="Presentation Scheduling"
-                    description="Organize presentation schedules and generate attendance sheets."
+                    title="Planification des soutenances"
+                    description="Organisez le planning des présentations et générez des feuilles de présence."
                 />
               </div>
             </div>
@@ -66,63 +65,63 @@ export default function Home() {
 
           <section className="py-16 bg-slate-50">
             <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold mb-8 text-center">For Teachers & Students</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">Pour les enseignants & les étudiants</h2>
               <div className="grid md:grid-cols-2 gap-12">
                 <div className="bg-white p-8 rounded-lg shadow-md">
-                  <h3 className="text-2xl font-bold mb-4">Teacher Interface</h3>
+                  <h3 className="text-2xl font-bold mb-4">Interface Enseignant</h3>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Create and manage classes</span>
+                      <span>Créer et gérer des classes</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Define project requirements and deadlines</span>
+                      <span>Définir les exigences du projet et les échéances</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Review submissions and detect plagiarism</span>
+                      <span>Examiner les soumissions et détecter le plagiat</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Create custom grading criteria</span>
+                      <span>Créer des critères d’évaluation personnalisés</span>
                     </li>
                   </ul>
                 </div>
                 <div className="bg-white p-8 rounded-lg shadow-md">
-                  <h3 className="text-2xl font-bold mb-4">Student Interface</h3>
+                  <h3 className="text-2xl font-bold mb-4">Interface Étudiant</h3>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Join or create project groups</span>
+                      <span>Rejoindre ou créer un groupe de projet</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Submit deliverables with pre-submission validation</span>
+                      <span>Soumettre les livrables avec validation préalable</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>Write and edit reports collaboratively</span>
+                      <span>Rédiger et modifier les rapports en collaboration</span>
                     </li>
                     <li className="flex items-start">
                       <div className="bg-slate-100 p-1 rounded-full mr-3 mt-1">
                         <ArrowRight className="h-4 w-4" />
                       </div>
-                      <span>View grades and feedback</span>
+                      <span>Consulter les notes et les retours</span>
                     </li>
                   </ul>
                 </div>
@@ -136,9 +135,9 @@ export default function Home() {
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="mb-4 md:mb-0">
                 <h2 className="text-xl font-bold">ProjectHub</h2>
-                <p className="text-slate-300">Student Project Management System</p>
+                <p className="text-slate-300">Système de gestion de projets étudiants</p>
               </div>
-              <div className="text-slate-300">&copy; {new Date().getFullYear()} ProjectHub. All rights reserved.</div>
+              <div className="text-slate-300">&copy; {new Date().getFullYear()} ProjectHub. Tous droits réservés.</div>
             </div>
           </div>
         </footer>

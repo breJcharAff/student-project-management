@@ -62,7 +62,7 @@ export default function LoginPage() {
       })
 
       if (!response.ok) {
-        let errorMessage = "Invalid email or password"
+        let errorMessage = "E-mail ou mot de passe invalide"
         try {
           const errorData = await response.json()
           errorMessage = errorData.message || errorMessage
@@ -113,7 +113,7 @@ export default function LoginPage() {
         localStorage.setItem("currentUser", JSON.stringify(userData))
         router.push("/dashboard")
       } else {
-        setError("Invalid email or password")
+        setError("E-mail ou mot de passe invalide")
       }
       setIsLoading(false)
     }, 1000)
@@ -123,8 +123,8 @@ export default function LoginPage() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account to continue</CardDescription>
+            <CardTitle className="text-2xl font-bold">Bienvenue</CardTitle>
+            <CardDescription>Connecte toi à ton compte pour continuer</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
@@ -143,21 +143,21 @@ export default function LoginPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-slate-500">Or continue with</span>
+                  <span className="bg-white px-2 text-slate-500">ou continuer avec</span>
                 </div>
               </div>
 
               {backendStatus === "checking" && (
                   <div className="flex justify-center py-2">
                     <Loader2 className="h-4 w-4 animate-spin text-slate-500 mr-2" />
-                    <span className="text-sm text-slate-500">Checking server status...</span>
+                    <span className="text-sm text-slate-500">Vérification du statut du serveur...</span>
                   </div>
               )}
 
               {backendStatus === "offline" && (
                   <Alert className="mb-4">
                     <AlertDescription>
-                      Backend server appears to be offline. You can still use mock login for testing.
+                      Backend server semble être hors ligne. Tu peux toujours utiliser le mock login pour tester.
                     </AlertDescription>
                   </Alert>
               )}
@@ -182,9 +182,9 @@ export default function LoginPage() {
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">Mot de passe</Label>
                       <Link href="/forgot-password" className="text-sm text-slate-500 hover:text-slate-900">
-                        Forgot password?
+                        Mot de passe oublié?
                       </Link>
                     </div>
                     <Input
@@ -199,7 +199,7 @@ export default function LoginPage() {
                     {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
+                          Connection...
                         </>
                     ) : (
                         "Sign In"
@@ -208,7 +208,7 @@ export default function LoginPage() {
                 </div>
                 {backendStatus !== "online" && (
                     <div className="mt-4 text-xs text-slate-500 text-center">
-                      <p>Using mock login mode for testing. Real authentication is disabled.</p>
+                      <p>Utilisation du mock login mode pour les tests. Authentification réelle désactivée.</p>
                     </div>
                 )}
               </form>
@@ -216,18 +216,18 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col">
             <p className="mt-2 text-center text-sm text-slate-500">
-              Don&apos;t have an account?{" "}
+              pas de compte?{" "}
               <Link href="/contact" className="font-medium text-slate-900 hover:underline">
-                Contact administrator
+                Contacter l'administrateur
               </Link>
             </p>
             <div className="mt-4 text-xs text-slate-400">
-              <p>Demo accounts:</p>
+              <p>Comptes démo:</p>
               <ul className="list-disc pl-4 mt-1">
-                <li>alice@example.com (Student)</li>
-                <li>stella@example.com (Teacher)</li>
+                <li>alice@example.com (élève)</li>
+                <li>stella@example.com (professeur)</li>
               </ul>
-              <p className="mt-1">Password for all accounts: "password"</p>
+              <p className="mt-1">Mot de passe pour tout les comptes: "monmdp123"</p>
             </div>
           </CardFooter>
         </Card>
