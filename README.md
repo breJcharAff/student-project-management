@@ -62,7 +62,7 @@ yarn install
 
 ```
 # Authentication
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
 NEXTAUTH_SECRET=your-secret-key
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
@@ -86,7 +86,7 @@ npm run dev
 yarn dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3001](http://localhost:3001) in your browser to see the application.
 
 ## Project Structure
 

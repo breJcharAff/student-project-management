@@ -1,16 +1,28 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { BookOpen, Calendar, FileText, Home, LayoutDashboard, LogOut, Settings, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { AuthManager, type User } from "@/lib/auth"
 
 export default function DashboardSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
 
-  // This would come from your authentication system
-  const userRole = "teacher" // or "student"
+  useEffect(() => {
+    const userData = AuthManager.getUser()
+    setUser(userData)
+  }, [])
+
+  const handleLogout = () => {
+    AuthManager.logout()
+    router.push("/login")
+  }
 
   const teacherNavItems = [
     {
@@ -78,43 +90,41 @@ export default function DashboardSidebar() {
     },
   ]
 
-  const navItems = userRole === "teacher" ? teacherNavItems : studentNavItems
+  const navItems = user?.role === "teacher" ? teacherNavItems : studentNavItems
 
   return (
-    <div className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col">
-      <div className="p-4 border-b">
-        <Link href="/" className="flex items-center gap-2">
-          <Home className="h-6 w-6" />
-          <span className="font-bold text-xl">ProjectHub</span>
-        </Link>
-      </div>
-
-      <div className="flex-1 py-6 px-4 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              pathname === item.href || pathname.startsWith(`${item.href}/`)
-                ? "bg-slate-100 text-slate-900"
-                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-            )}
-          >
-            {item.icon}
-            {item.title}
+      <div className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col">
+        <div className="p-4 border-b">
+          <Link href="/" className="flex items-center gap-2">
+            <Home className="h-6 w-6" />
+            <span className="font-bold text-xl">ProjectHub</span>
           </Link>
-        ))}
-      </div>
+        </div>
 
-      <div className="p-4 border-t">
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link href="/logout">
+        <div className="flex-1 py-6 px-4 space-y-1">
+          {navItems.map((item) => (
+              <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      pathname === item.href || pathname.startsWith(`${item.href}/`)
+                          ? "bg-slate-100 text-slate-900"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                  )}
+              >
+                {item.icon}
+                {item.title}
+              </Link>
+          ))}
+        </div>
+
+        <div className="p-4 border-t">
+          <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
             <LogOut className="h-5 w-5 mr-2" />
             Logout
-          </Link>
-        </Button>
+          </Button>
+        </div>
       </div>
-    </div>
   )
 }
