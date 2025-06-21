@@ -6,7 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Users, Loader2, Calendar, Clock, FileText, Download, GraduationCap, Target, Award } from "lucide-react"
+import {
+  Users,
+  Loader2,
+  Calendar,
+  Clock,
+  FileText,
+  Download,
+  GraduationCap,
+  Target,
+  Award,
+  Settings,
+} from "lucide-react"
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
 import { AuthManager } from "@/lib/auth"
@@ -74,17 +85,23 @@ interface Project {
   promotions: Promotion[]
 }
 
-export default function ProjectPage({ params }: { params: { id: string } }) {
+interface ProjectPageClientProps {
+  projectId: string
+}
+
+function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [project, setProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [userRole, setUserRole] = useState<string>("")
+  const [currentUser, setCurrentUser] = useState<any>(null)
 
   useEffect(() => {
     // Get user role from localStorage
     const user = AuthManager.getUser()
     if (user) {
       setUserRole(user.role)
+      setCurrentUser(user)
     }
   }, [])
 
@@ -93,7 +110,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
       setIsLoading(true)
       setError("")
 
-      const response = await apiClient.getProject(params.id)
+      const response = await apiClient.getProject(projectId)
 
       if (response.error) {
         setError(response.error)
@@ -105,7 +122,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
     }
 
     fetchProject()
-  }, [params.id])
+  }, [projectId])
 
   if (isLoading) {
     return (
@@ -168,6 +185,10 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
 
   const getCompletedDeliverables = () => {
     return project.groups.reduce((total, group) => total + group.deliverables.length, 0)
+  }
+
+  const isUserInGroup = (group: Group) => {
+    return currentUser && group.students.some((student) => student.id === currentUser.id)
   }
 
   return (
@@ -298,10 +319,25 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                                       {group.grade}/20
                                     </Badge>
                                 )}
+                                {isUserInGroup(group) && (
+                                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                                      Your Group
+                                    </Badge>
+                                )}
                               </CardTitle>
                               <CardDescription>Defense: {formatDate(group.defenseTime)}</CardDescription>
                             </div>
-                            <Badge variant="outline">{group.students.length} students</Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{group.students.length} students</Badge>
+                              {isUserInGroup(group) && (
+                                  <Button asChild size="sm" variant="outline">
+                                    <Link href={`/dashboard/groups/${group.id}`} className="flex items-center gap-1">
+                                      <Settings className="h-3 w-3" />
+                                      Manage
+                                    </Link>
+                                  </Button>
+                              )}
+                            </div>
                           </div>
                         </CardHeader>
                         <CardContent>
@@ -311,11 +347,21 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                               <h4 className="font-medium mb-2">Students</h4>
                               <div className="flex flex-wrap gap-2">
                                 {group.students.map((student) => (
-                                    <div key={student.id} className="flex items-center gap-2 bg-slate-50 rounded-md px-2 py-1">
+                                    <div
+                                        key={student.id}
+                                        className={`flex items-center gap-2 rounded-md px-2 py-1 ${
+                                            currentUser && student.id === currentUser.id
+                                                ? "bg-blue-50 border border-blue-200"
+                                                : "bg-slate-50"
+                                        }`}
+                                    >
                                       <Avatar className="h-6 w-6">
                                         <AvatarFallback className="text-xs">{student.name.charAt(0)}</AvatarFallback>
                                       </Avatar>
-                                      <span className="text-sm">{student.name}</span>
+                                      <span className="text-sm">
+                                {student.name}
+                                        {currentUser && student.id === currentUser.id && " (You)"}
+                              </span>
                                     </div>
                                 ))}
                               </div>
@@ -531,4 +577,10 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
         </Tabs>
       </div>
   )
+}
+
+export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+
+  return <ProjectPageClient projectId={id} />
 }

@@ -2,85 +2,143 @@
 import { AuthManager } from "./auth"
 
 interface ApiResponse<T> {
-    data?: T
-    error?: string
+  data?: T
+  error?: string
 }
 
 class ApiClient {
-    private baseUrl = "/api"
+  private baseUrl = "/api"
 
-    private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-        try {
-            const headers: HeadersInit = {
-                "Content-Type": "application/json",
-                ...options.headers,
-            }
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...options.headers,
+      }
 
-            const token = AuthManager.getToken()
-            if (token) {
-                headers.Authorization = `Bearer ${token}`
-            }
+      const token = AuthManager.getToken()
+      if (token) {
+        headers.Authorization = `Bearer ${token}`
+      }
 
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                ...options,
-                headers,
-            })
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers,
+      })
 
-            if (!response.ok) {
-                // If unauthorized, logout and redirect
-                if (response.status === 401) {
-                    AuthManager.logout()
-                    if (typeof window !== "undefined") {
-                        window.location.href = "/login"
-                    }
-                    return { error: "Authentication required" }
-                }
-
-                const errorData = await response.json().catch(() => ({}))
-                return { error: errorData.message || `HTTP ${response.status}` }
-            }
-
-            const data = await response.json()
-            return { data }
-        } catch (error) {
-            console.error(`API request failed: ${endpoint}`, error)
-            return { error: "Network error" }
+      if (!response.ok) {
+        // If unauthorized, logout and redirect
+        if (response.status === 401) {
+          AuthManager.logout()
+          if (typeof window !== "undefined") {
+            window.location.href = "/login"
+          }
+          return { error: "Authentication required" }
         }
+
+        const errorData = await response.json().catch(() => ({}))
+        return { error: errorData.message || `HTTP ${response.status}` }
+      }
+
+      const data = await response.json()
+      return { data }
+    } catch (error) {
+      console.error(`API request failed: ${endpoint}`, error)
+      return { error: "Network error" }
+    }
+  }
+
+  // Authentication
+  async login(email: string, password: string): Promise<ApiResponse<any>> {
+    return this.request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    })
+  }
+
+  // Projects
+  async getProjects(): Promise<ApiResponse<any[]>> {
+    return this.request("/projects")
+  }
+
+  async getProject(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/projects/${id}`)
+  }
+
+  async createProject(project: any): Promise<ApiResponse<any>> {
+    return this.request("/projects", {
+      method: "POST",
+      body: JSON.stringify(project),
+    })
+  }
+
+  // Groups
+  async getGroups(): Promise<ApiResponse<any[]>> {
+    return this.request("/groups")
+  }
+
+  async getGroup(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${id}`)
+  }
+
+  async leaveGroup(groupId: string): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${groupId}/leave`, {
+      method: "POST",
+      body: JSON.stringify({ studentIds: [AuthManager.getUser()?.id] }),
+    })
+  }
+
+  // Deliverables
+  async getGroupDeliverables(groupId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/deliverables/group/${groupId}`)
+  }
+
+  async uploadDeliverable(groupId: string, formData: FormData): Promise<ApiResponse<any>> {
+    const token = AuthManager.getToken()
+
+    // Use the correct endpoint with query parameter
+    const response = await fetch(`${this.baseUrl}/deliverables/upload?groupId=${groupId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Don't set Content-Type for FormData, let the browser set it
+      },
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      return { error: errorData.message || `HTTP ${response.status}` }
     }
 
-    // Authentication
-    async login(email: string, password: string): Promise<ApiResponse<any>> {
-        return this.request("/auth/login", {
-            method: "POST",
-            body: JSON.stringify({ email, password }),
-        })
-    }
+    const data = await response.json()
+    return { data }
+  }
 
-    // Projects
-    async getProjects(): Promise<ApiResponse<any[]>> {
-        return this.request("/projects")
-    }
+  async downloadDeliverable(deliverableId: string): Promise<Blob | null> {
+    try {
+      const token = AuthManager.getToken()
+      const response = await fetch(`${this.baseUrl}/deliverables/download?deliverableId=${deliverableId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-    async getProject(id: string): Promise<ApiResponse<any>> {
-        return this.request(`/projects/${id}`)
-    }
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
 
-    async createProject(project: any): Promise<ApiResponse<any>> {
-        return this.request("/projects", {
-            method: "POST",
-            body: JSON.stringify(project),
-        })
+      return await response.blob()
+    } catch (error) {
+      console.error("Download failed:", error)
+      return null
     }
+  }
 
-    // Groups
-    async getGroups(): Promise<ApiResponse<any[]>> {
-        return this.request("/groups")
-    }
-
-    // Evaluations
-    async getEvaluations(): Promise<ApiResponse<any[]>> {
-        return this.request("/evaluations")
-    }
+  // Evaluations
+  async getEvaluations(): Promise<ApiResponse<any[]>> {
+    return this.request("/evaluations")
+  }
 }
 
 export const apiClient = new ApiClient()

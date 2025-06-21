@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Users, Loader2, Calendar, Clock, ExternalLink, Info, Award, GraduationCap } from "lucide-react"
+import { Users, Loader2, Calendar, Clock, ExternalLink, Info, Award, GraduationCap, Settings } from "lucide-react"
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
 import { AuthManager, type User } from "@/lib/auth"
@@ -192,12 +192,20 @@ export default function GroupsPage() {
                             </span>
                                                     </div>
                                                 </div>
-                                                <Button asChild>
-                                                    <Link href={`/dashboard/projects/${group.project.id}`} className="flex items-center gap-2">
-                                                        View Project
-                                                        <ExternalLink className="h-4 w-4" />
-                                                    </Link>
-                                                </Button>
+                                                <div className="flex gap-2">
+                                                    <Button asChild variant="outline">
+                                                        <Link href={`/dashboard/groups/${group.id}`} className="flex items-center gap-2">
+                                                            <Settings className="h-4 w-4" />
+                                                            Manage Group
+                                                        </Link>
+                                                    </Button>
+                                                    <Button asChild>
+                                                        <Link href={`/dashboard/projects/${group.project.id}`} className="flex items-center gap-2">
+                                                            View Project
+                                                            <ExternalLink className="h-4 w-4" />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </CardHeader>
 
@@ -281,18 +289,6 @@ export default function GroupsPage() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Quick Actions */}
-                                            <div className="mt-6 pt-4 border-t">
-                                                <div className="flex gap-3">
-                                                    <Button asChild variant="default">
-                                                        <Link href={`/dashboard/projects/${group.project.id}`}>View Project Details</Link>
-                                                    </Button>
-                                                    <Button asChild variant="outline">
-                                                        <Link href={`/dashboard/projects/${group.project.id}#groups`}>View All Groups</Link>
-                                                    </Button>
                                                 </div>
                                             </div>
                                         </CardContent>
