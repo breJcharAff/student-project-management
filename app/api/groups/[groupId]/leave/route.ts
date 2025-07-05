@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, { params }: { params: { groupId
     // Get the request body
     const body = await request.json()
 
-    const response = await fetch(`https://pa-backend-ar8v.onrender.com/groups/${groupId}/students/remove`, {
+    const response = await fetch(`http://localhost:3000/groups/${groupId}/students/remove`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

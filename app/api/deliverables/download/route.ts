@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         // Get the authorization header from the request
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch(`https://pa-backend-ar8v.onrender.com/deliverables/${deliverableId}/download`, {
+        const response = await fetch(`https://http://localhost:3000/deliverables/${deliverableId}/download`, {
             method: "GET",
             headers: {
                 ...(authHeader && { Authorization: authHeader }),

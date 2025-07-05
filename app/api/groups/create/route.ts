@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
 
         console.log("Creating group with data:", body)
 
-        const response = await fetch("https://pa-backend-ar8v.onrender.com/groups", {
+        const response = await fetch("http://localhost:3000/groups", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

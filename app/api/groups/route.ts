@@ -4,7 +4,7 @@ export async function GET(request: NextRequest) {
     try {
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch("https://pa-backend-ar8v.onrender.com/groups", {
+        const response = await fetch("http://localhost:3000/groups", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
