@@ -81,6 +81,20 @@ class ApiClient {
     return this.request(`/groups/${id}`)
   }
 
+  async createGroup(groupData: { projectId: number }): Promise<ApiResponse<any>> {
+    return this.request("/groups/create", {
+      method: "POST",
+      body: JSON.stringify(groupData),
+    })
+  }
+
+  async joinGroup(groupId: string, students: number[]): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${groupId}/join`, {
+      method: "POST",
+      body: JSON.stringify({ students }),
+    })
+  }
+
   async leaveGroup(groupId: string): Promise<ApiResponse<any>> {
     return this.request(`/groups/${groupId}/leave`, {
       method: "POST",

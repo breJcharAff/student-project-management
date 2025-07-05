@@ -21,6 +21,7 @@ import {
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
 import { AuthManager } from "@/lib/auth"
+import { GroupManagementDialog } from "@/components/group-management-dialog"
 
 interface Student {
   id: number
@@ -105,22 +106,22 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     }
   }, [])
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      setIsLoading(true)
-      setError("")
+  const fetchProject = async () => {
+    setIsLoading(true)
+    setError("")
 
-      const response = await apiClient.getProject(projectId)
+    const response = await apiClient.getProject(projectId)
 
-      if (response.error) {
-        setError(response.error)
-      } else if (response.data) {
-        setProject(response.data)
-      }
-
-      setIsLoading(false)
+    if (response.error) {
+      setError(response.error)
+    } else if (response.data) {
+      setProject(response.data)
     }
 
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
     fetchProject()
   }, [projectId])
 
@@ -190,6 +191,12 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const isUserInGroup = (group: Group) => {
     return currentUser && group.students.some((student) => student.id === currentUser.id)
   }
+
+  const getCurrentUserGroup = () => {
+    return project.groups.find((group) => isUserInGroup(group)) || null
+  }
+
+  const currentUserGroup = getCurrentUserGroup()
 
   return (
       <div className="space-y-6">
@@ -295,11 +302,20 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           <TabsContent value="groups" className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Groups</h2>
-              {userRole === "teacher" && (
-                  <Button asChild>
-                    <Link href={`/dashboard/projects/${project.id}/groups/manage`}>Manage Groups</Link>
-                  </Button>
-              )}
+              <div className="flex gap-2">
+                {userRole === "student" && (
+                    <GroupManagementDialog
+                        project={project}
+                        currentUserGroup={currentUserGroup}
+                        onGroupChange={fetchProject}
+                    />
+                )}
+                {userRole === "teacher" && (
+                    <Button asChild>
+                      <Link href={`/dashboard/projects/${project.id}/groups/manage`}>Manage Groups</Link>
+                    </Button>
+                )}
+              </div>
             </div>
 
             <div className="grid gap-4">
