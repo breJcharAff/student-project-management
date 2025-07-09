@@ -221,7 +221,7 @@ export function GroupManagementDialog({ project, currentUserGroup, onGroupChange
                                             <div>
                                                 <h4 className="font-medium mb-2 text-sm">Current Members</h4>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {group.students.map((student) => (
+                                                    {(group.students ?? []).map((student) => (
                                                         <div key={student.id} className="flex items-center gap-2 bg-slate-100 rounded-md px-2 py-1">
                                                             <Avatar className="h-5 w-5">
                                                                 <AvatarFallback className="text-xs">{student.name.charAt(0)}</AvatarFallback>

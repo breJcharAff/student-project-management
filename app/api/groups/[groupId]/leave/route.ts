@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function POST(request: NextRequest, { params }: { params: { groupId: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ groupId: string }> }) {
   try {
-    const { groupId } = params
+    const { groupId } = await params
 
     // Get the authorization header from the request
     const authHeader = request.headers.get("authorization")

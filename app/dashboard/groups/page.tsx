@@ -173,12 +173,15 @@ export default function GroupsPage() {
                                                         <Badge variant="outline" className="capitalize">
                                                             {group.project.type}
                                                         </Badge>
-                                                        {group.grade && (
+                                                        {group.grade !== null && group.grade !== undefined ? (
                                                             <Badge variant="default" className="flex items-center gap-1">
                                                                 <Award className="h-3 w-3" />
                                                                 {group.grade}/20
                                                             </Badge>
+                                                        ) : (
+                                                            <Badge variant="secondary">Not graded</Badge>
                                                         )}
+
                                                     </div>
                                                     <CardDescription className="text-base mb-3">{group.project.description}</CardDescription>
                                                     <div className="flex items-center gap-4 text-sm text-slate-600">

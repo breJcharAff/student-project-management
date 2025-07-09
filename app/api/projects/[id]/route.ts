@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch(`http://localhost:3000/projects/${params.id}`, {
+        const response = await fetch(`http://localhost:3000/projects/${(await params).id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
