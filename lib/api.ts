@@ -72,6 +72,17 @@ class ApiClient {
     })
   }
 
+  async updateProject(id: string, project: any): Promise<ApiResponse<any>> {
+    return this.request(`/projects/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(project),
+    })
+  }
+
+  async getPromotions(): Promise<ApiResponse<any[]>> {
+    return this.request("/promotions")
+  }
+
   async getProjectSteps(projectId: string): Promise<ApiResponse<any[]>> {
     return this.request(`/projectSteps/projects/${projectId}/steps`)
   }
