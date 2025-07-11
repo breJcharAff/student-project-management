@@ -21,17 +21,12 @@ interface Project {
   defenseDate: string
   defenseDurationInMinutes: number
   promotions: Array<{ id: number; name: string }>
+  groups?: Array<{ id: number; isFinal: boolean }>
 }
 
 interface Promotion {
   id: number
   name: string
-}
-
-interface EvaluationGrid {
-  id: number
-  isFinal: boolean
-  project: { id: number }
 }
 
 export default function EditProjectPage() {
@@ -41,7 +36,6 @@ export default function EditProjectPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [promotions, setPromotions] = useState<Promotion[]>([])
-  const [evaluationGrids, setEvaluationGrids] = useState<EvaluationGrid[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,52 +48,62 @@ export default function EditProjectPage() {
   const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(0)
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
   const [isGradesFinalized, setIsGradesFinalized] = useState(false)
+  const [initialIsGradesFinalized, setInitialIsGradesFinalized] = useState(false)
+
+  const fetchData = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const projectResponse = await apiClient.getProject(projectId)
+      const promotionsResponse = await apiClient.getPromotions()
+
+      if (projectResponse.error) {
+        setError(projectResponse.error)
+        setIsLoading(false)
+        return
+      }
+      if (promotionsResponse.error) {
+        setError(promotionsResponse.error)
+        setIsLoading(false)
+        return
+      }
+
+      const fetchedProject = projectResponse.data
+      const fetchedPromotions = promotionsResponse.data
+
+      setProject(fetchedProject)
+      setPromotions(fetchedPromotions)
+
+      setName(fetchedProject.name)
+      setDescription(fetchedProject.description)
+      setIsPublished(fetchedProject.isPublished)
+      setDefenseDate(fetchedProject.defenseDate ? new Date(fetchedProject.defenseDate).toISOString().slice(0, 16) : "")
+      setDefenseDurationInMinutes(fetchedProject.defenseDurationInMinutes || 0)
+      setSelectedPromotionIds(fetchedProject.promotions.map((p: Promotion) => p.id))
+
+      // Determine initial isGradesFinalized state based on the first group's isFinal status
+      let gradesFinalized = false;
+      if (fetchedProject.groups && fetchedProject.groups.length > 0) {
+        const firstGroup = fetchedProject.groups[0]
+        // Fetch the full group details to get the isFinal status
+        const groupDetailsResponse = await apiClient.getGroup(firstGroup.id.toString())
+        if (!groupDetailsResponse.error && groupDetailsResponse.data) {
+          gradesFinalized = groupDetailsResponse.data.isFinal || false
+        } else if (groupDetailsResponse.error) {
+          console.error("Failed to fetch first group details:", groupDetailsResponse.error)
+        }
+      }
+      setIsGradesFinalized(gradesFinalized)
+      setInitialIsGradesFinalized(gradesFinalized)
+
+    } catch (err: any) {
+      setError(err.message || "Failed to load data.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const projectResponse = await apiClient.getProject(projectId)
-        const promotionsResponse = await apiClient.getPromotions()
-        const evaluationGridsResponse = await apiClient.getEvaluations() // Using getEvaluations for all grids
-
-        if (projectResponse.error) {
-          setError(projectResponse.error)
-          setIsLoading(false)
-          return
-        }
-        if (promotionsResponse.error) {
-          setError(promotionsResponse.error)
-          setIsLoading(false)
-          return
-        }
-
-        const fetchedProject = projectResponse.data
-        const fetchedPromotions = promotionsResponse.data
-        const fetchedEvaluationGrids = evaluationGridsResponse.data || []
-
-        setProject(fetchedProject)
-        setPromotions(fetchedPromotions)
-        setEvaluationGrids(fetchedEvaluationGrids)
-
-        setName(fetchedProject.name)
-        setDescription(fetchedProject.description)
-        setIsPublished(fetchedProject.isPublished)
-        setDefenseDate(fetchedProject.defenseDate ? new Date(fetchedProject.defenseDate).toISOString().slice(0, 16) : "")
-        setDefenseDurationInMinutes(fetchedProject.defenseDurationInMinutes || 0)
-        setSelectedPromotionIds(fetchedProject.promotions.map((p: Promotion) => p.id))
-
-        // Determine initial isGradesFinalized state
-        const projectGrids = fetchedEvaluationGrids.filter((grid: EvaluationGrid) => grid.project.id === parseInt(projectId))
-        setIsGradesFinalized(projectGrids.length > 0 && projectGrids.every((grid: EvaluationGrid) => grid.isFinal))
-
-      } catch (err: any) {
-        setError(err.message || "Failed to load data.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
     fetchData()
   }, [projectId])
 
@@ -110,23 +114,37 @@ export default function EditProjectPage() {
     setSuccess(null)
 
     try {
-      const response = await apiClient.updateProject(projectId, {
+      const projectUpdatePayload = {
         name,
         description,
         isPublished,
         defenseDate: defenseDate || null,
         defenseDurationInMinutes: defenseDurationInMinutes || null,
         promotionIds: selectedPromotionIds,
-      })
-
-      if (response.error) {
-        setError(response.error)
-      } else {
-        setSuccess("Project updated successfully!")
-        setTimeout(() => {
-          router.push(`/dashboard/projects/${projectId}`)
-        }, 2000)
       }
+      const projectUpdateResponse = await apiClient.updateProject(projectId, projectUpdatePayload)
+
+      if (projectUpdateResponse.error) {
+        setError(projectUpdateResponse.error)
+        setIsSaving(false)
+        return
+      }
+
+      // Only call finalizeProjectGrades if the state has changed
+      if (isGradesFinalized !== initialIsGradesFinalized) {
+        const finalizeResponse = await apiClient.finalizeProjectGrades(projectId, isGradesFinalized)
+        if (finalizeResponse.error) {
+          setError(finalizeResponse.error)
+          setIsSaving(false)
+          return
+        }
+      }
+
+      setSuccess("Project updated successfully!")
+      setTimeout(() => {
+        router.push(`/dashboard/projects/${projectId}`)
+      }, 2000)
+
     } catch (err: any) {
       setError(err.message || "Failed to update project.")
     } finally {
@@ -159,31 +177,12 @@ export default function EditProjectPage() {
     }
   }
 
-  const handleFinalizeGrades = async (checked: boolean) => {
+  const handleFinalizeGrades = (checked: boolean) => {
     setIsGradesFinalized(checked)
-    setIsSaving(true)
-    setError(null)
-    setSuccess(null)
-
-    try {
-      const projectGrids = evaluationGrids.filter((grid: EvaluationGrid) => grid.project.id === parseInt(projectId))
-      const updatePromises = projectGrids.map((grid: EvaluationGrid) =>
-        apiClient.updateEvaluationGrid(grid.id.toString(), { isFinal: checked })
-      )
-      const results = await Promise.all(updatePromises)
-
-      const hasError = results.some(result => result.error)
-      if (hasError) {
-        setError("Failed to update all evaluation grids.")
-      } else {
-        setSuccess(`Project grades ${checked ? "finalized" : "unfinalized"} successfully!`) 
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to update grades.")
-    } finally {
-      setIsSaving(false)
-    }
   }
+
+  // Determine initial isGradesFinalized state based on the first group's isFinal status
+  // This is now handled by the state variable `isGradesFinalized` and `initialIsGradesFinalized`
 
   if (isLoading) {
     return (

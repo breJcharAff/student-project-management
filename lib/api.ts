@@ -40,6 +40,11 @@ class ApiClient {
         return { error: errorData.message || `HTTP ${response.status}` }
       }
 
+      // Handle 204 No Content responses
+      if (response.status === 204) {
+        return { data: null } // Or { data: {} } depending on desired empty state
+      }
+
       const data = await response.json()
       return { data }
     } catch (error) {
@@ -93,6 +98,13 @@ class ApiClient {
     return this.request(`/evaluation-grids/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
+    })
+  }
+
+  async finalizeProjectGrades(projectId: string, isFinal: boolean): Promise<ApiResponse<any>> {
+    return this.request(`/projects/${projectId}/finalize`, {
+      method: "POST",
+      body: JSON.stringify({ isFinal }),
     })
   }
 
