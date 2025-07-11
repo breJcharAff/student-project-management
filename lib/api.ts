@@ -83,6 +83,19 @@ class ApiClient {
     return this.request("/promotions")
   }
 
+  async deleteProject(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/projects/${id}`, {
+      method: "DELETE",
+    })
+  }
+
+  async updateEvaluationGrid(id: string, data: { isFinal: boolean }): Promise<ApiResponse<any>> {
+    return this.request(`/evaluation-grids/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    })
+  }
+
   async getProjectSteps(projectId: string): Promise<ApiResponse<any[]>> {
     return this.request(`/projectSteps/projects/${projectId}/steps`)
   }

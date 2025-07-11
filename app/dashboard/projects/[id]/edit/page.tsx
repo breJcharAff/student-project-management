@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, CheckCircle, AlertTriangle } from "lucide-react"
+import { Loader2, CheckCircle, AlertTriangle, Trash2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { MultiSelect } from "@/components/ui/multi-select"
 
@@ -18,12 +18,20 @@ interface Project {
   name: string
   description: string
   isPublished: boolean
+  defenseDate: string
+  defenseDurationInMinutes: number
   promotions: Array<{ id: number; name: string }>
 }
 
 interface Promotion {
   id: number
   name: string
+}
+
+interface EvaluationGrid {
+  id: number
+  isFinal: boolean
+  project: { id: number }
 }
 
 export default function EditProjectPage() {
@@ -33,6 +41,7 @@ export default function EditProjectPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [evaluationGrids, setEvaluationGrids] = useState<EvaluationGrid[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +50,10 @@ export default function EditProjectPage() {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [isPublished, setIsPublished] = useState(false)
+  const [defenseDate, setDefenseDate] = useState("")
+  const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(0)
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
+  const [isGradesFinalized, setIsGradesFinalized] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +62,7 @@ export default function EditProjectPage() {
       try {
         const projectResponse = await apiClient.getProject(projectId)
         const promotionsResponse = await apiClient.getPromotions()
+        const evaluationGridsResponse = await apiClient.getEvaluations() // Using getEvaluations for all grids
 
         if (projectResponse.error) {
           setError(projectResponse.error)
@@ -64,14 +77,23 @@ export default function EditProjectPage() {
 
         const fetchedProject = projectResponse.data
         const fetchedPromotions = promotionsResponse.data
+        const fetchedEvaluationGrids = evaluationGridsResponse.data || []
 
         setProject(fetchedProject)
         setPromotions(fetchedPromotions)
+        setEvaluationGrids(fetchedEvaluationGrids)
 
         setName(fetchedProject.name)
         setDescription(fetchedProject.description)
         setIsPublished(fetchedProject.isPublished)
+        setDefenseDate(fetchedProject.defenseDate ? new Date(fetchedProject.defenseDate).toISOString().slice(0, 16) : "")
+        setDefenseDurationInMinutes(fetchedProject.defenseDurationInMinutes || 0)
         setSelectedPromotionIds(fetchedProject.promotions.map((p: Promotion) => p.id))
+
+        // Determine initial isGradesFinalized state
+        const projectGrids = fetchedEvaluationGrids.filter((grid: EvaluationGrid) => grid.project.id === parseInt(projectId))
+        setIsGradesFinalized(projectGrids.length > 0 && projectGrids.every((grid: EvaluationGrid) => grid.isFinal))
+
       } catch (err: any) {
         setError(err.message || "Failed to load data.")
       } finally {
@@ -92,6 +114,8 @@ export default function EditProjectPage() {
         name,
         description,
         isPublished,
+        defenseDate: defenseDate || null,
+        defenseDurationInMinutes: defenseDurationInMinutes || null,
         promotionIds: selectedPromotionIds,
       })
 
@@ -99,13 +123,63 @@ export default function EditProjectPage() {
         setError(response.error)
       } else {
         setSuccess("Project updated successfully!")
-        // Optionally, redirect after a short delay
         setTimeout(() => {
           router.push(`/dashboard/projects/${projectId}`)
         }, 2000)
       }
     } catch (err: any) {
       setError(err.message || "Failed to update project.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteProject = async () => {
+    if (!confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      return
+    }
+    setIsSaving(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const response = await apiClient.deleteProject(projectId)
+      if (response.error) {
+        setError(response.error)
+      } else {
+        setSuccess("Project deleted successfully!")
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 2000)
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to delete project.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleFinalizeGrades = async (checked: boolean) => {
+    setIsGradesFinalized(checked)
+    setIsSaving(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const projectGrids = evaluationGrids.filter((grid: EvaluationGrid) => grid.project.id === parseInt(projectId))
+      const updatePromises = projectGrids.map((grid: EvaluationGrid) =>
+        apiClient.updateEvaluationGrid(grid.id.toString(), { isFinal: checked })
+      )
+      const results = await Promise.all(updatePromises)
+
+      const hasError = results.some(result => result.error)
+      if (hasError) {
+        setError("Failed to update all evaluation grids.")
+      } else {
+        setSuccess(`Project grades ${checked ? "finalized" : "unfinalized"} successfully!`) 
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to update grades.")
     } finally {
       setIsSaving(false)
     }
@@ -146,6 +220,10 @@ export default function EditProjectPage() {
           <h1 className="text-3xl font-bold">Edit Project: {project.name}</h1>
           <p className="text-muted-foreground">Modify the details of your project</p>
         </div>
+        <Button variant="destructive" onClick={handleDeleteProject} disabled={isSaving}>
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Project
+        </Button>
       </div>
 
       {error && (
@@ -197,6 +275,24 @@ export default function EditProjectPage() {
                 <Label htmlFor="isPublished">Publish Project (Visible to Students)</Label>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="defenseDate">Defense Date</Label>
+                <Input
+                  id="defenseDate"
+                  type="datetime-local"
+                  value={defenseDate}
+                  onChange={(e) => setDefenseDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="defenseDuration">Defense Duration (minutes)</Label>
+                <Input
+                  id="defenseDuration"
+                  type="number"
+                  value={defenseDurationInMinutes}
+                  onChange={(e) => setDefenseDurationInMinutes(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="promotions">Associated Promotions</Label>
                 <MultiSelect
                   options={promotions.map((p) => ({ label: p.name, value: p.id }))}
@@ -204,6 +300,14 @@ export default function EditProjectPage() {
                   onSelectedChange={setSelectedPromotionIds}
                   placeholder="Select promotions..."
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="finalizeGrades"
+                  checked={isGradesFinalized}
+                  onCheckedChange={handleFinalizeGrades}
+                />
+                <Label htmlFor="finalizeGrades">Finalize Project Grades</Label>
               </div>
             </div>
             <Button type="submit" disabled={isSaving}>
