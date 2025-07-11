@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -109,15 +109,43 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       setIsLoading(true)
       setError("")
 
-      const response = await apiClient.getProject(projectId)
+      try {
+        const projectResponse = await apiClient.getProject(projectId)
 
-      if (response.error) {
-        setError(response.error)
-      } else if (response.data) {
-        setProject(response.data)
+        if (projectResponse.error) {
+          setError(projectResponse.error)
+          setProject(null) // Ensure project is null on error
+        } else if (projectResponse.data) {
+          let updatedProject = projectResponse.data
+
+          // If the project has groups, fetch one to get min/max students per group
+          if (updatedProject.groups && updatedProject.groups.length > 0) {
+            const firstGroupId = updatedProject.groups[0].id.toString()
+            const groupResponse = await apiClient.getGroup(firstGroupId)
+            if (!groupResponse.error && groupResponse.data && groupResponse.data.project) {
+              updatedProject = {
+                ...updatedProject,
+                minStudentsPerGroup: groupResponse.data.project.minStudentsPerGroup,
+                maxStudentsPerGroup: groupResponse.data.project.maxStudentsPerGroup,
+              }
+            }
+
+            // Extract criteria from evaluationGrids within groups
+            const projectCriteria = updatedProject.groups.flatMap((group: any) =>
+              (group.evaluationGrids || []).flatMap((grid: any) => grid.criteria || [])
+            )
+            updatedProject = { ...updatedProject, criteria: projectCriteria }
+          }
+
+          setProject(updatedProject)
+        }
+      } catch (e: any) {
+        console.error("Error in fetchProject:", e)
+        setError(e.message || "An unexpected error occurred.")
+        setProject(null)
+      } finally {
+        setIsLoading(false)
       }
-
-      setIsLoading(false)
     }
 
     useEffect(() => {
@@ -178,7 +206,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     }
 
     const getCriteriaByTarget = (target: string) => {
-      return (project.criteria ?? []).filter((c) => c.target.toLowerCase() === target.toLowerCase())
+      return (project.criteria ?? []).filter((c) => c.target?.toLowerCase() === target.toLowerCase())
     }
 
     const getTotalStudents = () => {
@@ -607,6 +635,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     )
   }
 
-  export default function ProjectPage({params}: { params: { id: string } }) {
-    return <ProjectPageClient projectId={params.id}/>
+  export default function ProjectPage({params}: { params: Promise<{ id: string }> }) {
+    const resolvedParams = React.use(params);
+    return <ProjectPageClient projectId={resolvedParams.id}/>
   }

@@ -14,9 +14,13 @@ interface Project {
     id: number
     name: string
     description: string
-    minStudentsPerGroup: number
-    maxStudentsPerGroup: number
+    minStudentsPerGroup?: number
+    maxStudentsPerGroup?: number
     createdById: number
+    groups?: Array<{
+        id: number
+        name: string
+    }>
 }
 
 export default function DashboardPage() {
@@ -40,7 +44,39 @@ export default function DashboardPage() {
             if (response.error) {
                 setError(response.error)
             } else if (response.data) {
-                setProjects(response.data)
+                console.log("Raw Projects Response:", response.data) // Log raw projects
+                const projectsWithGroupSize = await Promise.all(
+                    response.data.map(async (project: Project) => {
+                        console.log("Processing Project:", project) // Log each project being processed
+                        let projectToProcess = project
+
+                        // If groups are not directly available, fetch full project details
+                        if (!project.groups || project.groups.length === 0) {
+                            const fullProjectResponse = await apiClient.getProject(project.id.toString())
+                            if (!fullProjectResponse.error && fullProjectResponse.data) {
+                                projectToProcess = fullProjectResponse.data
+                                console.log("Full Project Details Fetched:", projectToProcess) // Log full project details
+                            } else if (fullProjectResponse.error) {
+                                console.error("Failed to fetch full project details for", project.id, ":", fullProjectResponse.error)
+                            }
+                        }
+
+                        if (projectToProcess.isGroupBased && projectToProcess.groups && projectToProcess.groups.length > 0) {
+                            const groupResponse = await apiClient.getGroup(projectToProcess.groups[0].id.toString())
+                            console.log("Group Response for project", projectToProcess.id, ":", groupResponse) // Log group response
+                            if (!groupResponse.error && groupResponse.data && groupResponse.data.project) {
+                                return {
+                                    ...projectToProcess,
+                                    minStudentsPerGroup: groupResponse.data.project.minStudentsPerGroup,
+                                    maxStudentsPerGroup: groupResponse.data.project.maxStudentsPerGroup,
+                                }
+                            }
+                        }
+                        return projectToProcess
+                    }),
+                )
+                console.log("Final Projects State:", projectsWithGroupSize) // Log final state
+                setProjects(projectsWithGroupSize)
             }
 
             setIsLoadingProjects(false)
