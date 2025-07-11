@@ -41,6 +41,11 @@ export default function DashboardSidebar() {
       icon: <Users className="h-5 w-5" />,
     },
     {
+      title: "Promotions",
+      href: "/dashboard/promotions/new",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
       title: "Deliverables",
       href: "/dashboard/deliverables",
       icon: <FileText className="h-5 w-5" />,

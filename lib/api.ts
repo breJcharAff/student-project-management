@@ -92,6 +92,17 @@ class ApiClient {
     return this.request(`/promotions/${promotionId}/students`)
   }
 
+  async createPromotion(promotionData: { name: string; teacherIds: number[] }): Promise<ApiResponse<any>> {
+    return this.request("/promotions", {
+      method: "POST",
+      body: JSON.stringify(promotionData),
+    })
+  }
+
+  async getUsers(): Promise<ApiResponse<any[]>> {
+    return this.request("/users")
+  }
+
   async deleteProject(id: string): Promise<ApiResponse<any>> {
     return this.request(`/projects/${id}`, {
       method: "DELETE",
