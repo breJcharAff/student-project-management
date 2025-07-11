@@ -178,7 +178,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     }
 
     const getCriteriaByTarget = (target: string) => {
-      return (project.criteria ?? []).filter((c) => c.target === target)
+      return (project.criteria ?? []).filter((c) => c.target.toLowerCase() === target.toLowerCase())
     }
 
     const getTotalStudents = () => {
@@ -262,8 +262,8 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-slate-500"/>
                   <span>
-                  {(project.minStudentsPerGroup ?? "??")}-{(project.maxStudentsPerGroup ?? "??")} students
-                </span>
+                    {project.minStudentsPerGroup && project.maxStudentsPerGroup ? `${project.minStudentsPerGroup}-${project.maxStudentsPerGroup} students` : 'N/A'}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -536,7 +536,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                     <Card key={promotion.id}>
                       <CardHeader>
                         <CardTitle>{promotion.name}</CardTitle>
-                        <CardDescription>{promotion.students?.length ?? 0} students</CardDescription>
+                        <CardDescription>{promotion.students ? promotion.students.length : 0} students</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">

@@ -28,6 +28,8 @@ import {
 import { AuthManager } from "@/lib/auth"
 import { apiClient } from "@/lib/api"
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 interface Group {
   id: number
   name: string
@@ -58,6 +60,7 @@ interface Group {
   }> | null
   deliverables?: Deliverable[]
 }
+
 interface Deliverable {
   id: number
   filename?: string
@@ -69,12 +72,21 @@ interface Deliverable {
   [key: string]: any
 }
 
+interface ProjectStep {
+  id: number
+  name: string
+  description: string
+  deadline: string
+  stepNumber: number
+}
+
 export default function GroupManagePage() {
   const params = useParams()
   const router = useRouter()
   const groupId = params.id as string
 
   const [group, setGroup] = useState<Group | null>(null)
+  const [projectSteps, setProjectSteps] = useState<ProjectStep[]>([])
   const [deliverables, setDeliverables] = useState<Deliverable[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -94,10 +106,11 @@ export default function GroupManagePage() {
     setLoading(true)
     setError(null)
     setGroup(null)
+    setProjectSteps([])
     setDeliverables([])
 
     const fetchAll = async () => {
-      // 1. Fetch group pour avoir le projectId
+      // 1. Fetch group to get projectId
       const groupResponse = await apiClient.getGroup(groupId)
       if (groupResponse.error || !groupResponse.data) {
         if (!cancelled) {
@@ -112,40 +125,41 @@ export default function GroupManagePage() {
       if (!projId) {
         if (!cancelled) {
           setError("No project associated with this group")
-          setDeliverables([])
           setLoading(false)
         }
         return
       }
 
-      // 2. Fetch projet complet pour les livrables du groupe
-      const projectResponse = await apiClient.getProject(projId)
+      // 2. Fetch project steps
+      const stepsResponse = await apiClient.getProjectSteps(projId.toString())
+      if (stepsResponse.error || !stepsResponse.data) {
+        if (!cancelled) {
+          setError(stepsResponse.error || "Failed to fetch project steps")
+          // Continue loading other data even if steps fail
+        }
+      } else if (!cancelled) {
+        setProjectSteps(stepsResponse.data)
+      }
+
+      // 3. Fetch deliverables for the project and filter for the current group
+      const projectResponse = await apiClient.getProject(projId.toString())
       if (projectResponse.error || !projectResponse.data) {
         if (!cancelled) {
           setError(projectResponse.error || "Failed to fetch project data")
-          setDeliverables([])
-          setLoading(false)
         }
-        return
+      } else if (!cancelled) {
+        const allDeliverables = projectResponse.data.groups?.flatMap((g: any) => g.deliverables) || []
+        const groupDeliverables = allDeliverables.filter((d: any) => d.groupId === parseInt(groupId))
+
+        const formattedDeliverables = groupDeliverables.map((d: any) => ({
+          ...d,
+          uploadedAt: d.uploadedAt || d.submittedAt,
+          title: d.title || d.filename || `Deliverable #${d.id}`,
+        }))
+        setDeliverables(formattedDeliverables)
       }
-      const foundGroup = (projectResponse.data.groups ?? []).find(
-          (g: any) => g.id.toString() === groupId.toString()
-      )
-      if (!foundGroup) {
-        if (!cancelled) {
-          setError("Groupe introuvable dans ce projet")
-          setDeliverables([])
-          setLoading(false)
-        }
-        return
-      }
-      const groupDeliverables = (foundGroup.deliverables ?? []).map((d: any) => ({
-        ...d,
-        uploadedAt: d.uploadedAt || d.submittedAt,
-        title: d.title || d.filename || `Livrable #${d.id}`,
-      }))
+
       if (!cancelled) {
-        setDeliverables(groupDeliverables)
         setLoading(false)
       }
     }
@@ -154,7 +168,7 @@ export default function GroupManagePage() {
   }, [groupId])
 
   // === UPLOAD LOGIC ================
-  const handleFileUpload = async (e: React.FormEvent) => {
+  const handleFileUpload = async (e: React.FormEvent, stepId: number) => {
     e.preventDefault()
     if (!uploadFile || !uploadTitle.trim()) {
       setError("Please select a file and enter a title")
@@ -172,7 +186,8 @@ export default function GroupManagePage() {
       formData.append("file", uploadFile)
       formData.append("title", uploadTitle.trim())
       formData.append("comment", uploadComment.trim())
-      const response = await apiClient.uploadDeliverable(groupId, formData)
+
+      const response = await apiClient.uploadDeliverable(stepId.toString(), formData)
       if (response.error) {
         setError(response.error)
       } else {
@@ -180,25 +195,23 @@ export default function GroupManagePage() {
         setUploadFile(null)
         setUploadTitle("")
         setUploadComment("")
-        // Refresh deliverables
-        // ==> Relancer le fetch complet (ci-dessous, même séquence qu'au mount)
-        setLoading(true)
-        setError(null)
-        const groupResponse = await apiClient.getGroup(groupId)
-        if (!groupResponse.error && groupResponse.data?.project?.id) {
-          const projId = groupResponse.data.project.id
-          const projectResponse = await apiClient.getProject(projId)
-          const foundGroup = (projectResponse.data.groups ?? []).find(
-              (g: any) => g.id.toString() === groupId.toString()
-          )
-          const groupDeliverables = (foundGroup?.deliverables ?? []).map((d: any) => ({
-            ...d,
-            uploadedAt: d.uploadedAt || d.submittedAt,
-            title: d.title || d.filename || `Livrable #${d.id}`,
-          }))
-          setDeliverables(groupDeliverables)
+
+        // Refresh deliverables for the project and filter for the current group
+        const projId = group?.project?.id
+        if (projId) {
+          const projectResponse = await apiClient.getProject(projId.toString())
+          if (!projectResponse.error && projectResponse.data) {
+            const allDeliverables = projectResponse.data.groups?.flatMap((g: any) => g.deliverables) || []
+            const groupDeliverables = allDeliverables.filter((d: any) => d.groupId === parseInt(groupId))
+
+            const formattedDeliverables = groupDeliverables.map((d: any) => ({
+              ...d,
+              uploadedAt: d.uploadedAt || d.submittedAt,
+              title: d.title || d.filename || `Deliverable #${d.id}`,
+            }))
+            setDeliverables(formattedDeliverables)
+          }
         }
-        setLoading(false)
       }
     } catch (err) {
       setError("Upload failed. Please try again.")
@@ -214,7 +227,7 @@ export default function GroupManagePage() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = deliverable.title || "deliverable.zip"
+        a.download = deliverable.filename || "deliverable.zip"
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -232,7 +245,7 @@ export default function GroupManagePage() {
       return
     }
     try {
-      const response = await apiClient.leaveGroup(groupId)
+      const response = await apiClient.leaveGroup(groupId, [currentUser.id])
       if (response.error) {
         setError(response.error)
       } else {
@@ -416,94 +429,100 @@ export default function GroupManagePage() {
           </CardContent>
         </Card>
 
-        {/* Upload Deliverable */}
+        {/* Project Steps and Deliverables */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              Upload Deliverable
+              Project Steps & Deliverables
             </CardTitle>
-            <CardDescription>Upload a ZIP file containing your project deliverable</CardDescription>
+            <CardDescription>Upload deliverables for each project step.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleFileUpload} className="space-y-4">
-              <div>
-                <Label htmlFor="file">File (ZIP only)</Label>
-                <Input
-                    id="file"
-                    type="file"
-                    accept=".zip"
-                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                    required
-                />
-              </div>
-              <div>
-                <Label htmlFor="title">Title</Label>
-                <Input
-                    id="title"
-                    value={uploadTitle}
-                    onChange={(e) => setUploadTitle(e.target.value)}
-                    placeholder="Enter deliverable title"
-                    required
-                />
-              </div>
-              <div>
-                <Label htmlFor="comment">Comment (optional)</Label>
-                <Textarea
-                    id="comment"
-                    value={uploadComment}
-                    onChange={(e) => setUploadComment(e.target.value)}
-                    placeholder="Add any comments about this deliverable"
-                    rows={3}
-                />
-              </div>
-              <Button type="submit" disabled={uploading}>
-                {uploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Uploading...
-                    </>
-                ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Deliverable
-                    </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Deliverables List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Download className="h-5 w-5" />
-              Deliverables ({deliverables.length})
-            </CardTitle>
-            <CardDescription>All deliverables uploaded by your group</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {deliverables.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">No deliverables uploaded yet</p>
-            ) : (
-                <div className="space-y-4">
-                  {deliverables.map((deliverable) => (
-                      <div key={deliverable.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{deliverable.title ?? deliverable.filename ?? "No title"}</h4>
-                          {deliverable.comment && <p className="text-sm text-muted-foreground mt-1">{deliverable.comment}</p>}
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Uploaded on {formatDate(deliverable.uploadedAt ?? deliverable.submittedAt)}
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleDownload(deliverable)}>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </div>
+            {projectSteps.length > 0 ? (
+              <Tabs defaultValue={projectSteps[0].id.toString()}>
+                <TabsList>
+                  {projectSteps.map((step) => (
+                    <TabsTrigger key={step.id} value={step.id.toString()}>
+                      Step {step.stepNumber}: {step.name}
+                    </TabsTrigger>
                   ))}
-                </div>
+                </TabsList>
+                {projectSteps.map((step) => (
+                  <TabsContent key={step.id} value={step.id.toString()}>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium">{step.name}</h4>
+                        <p className="text-sm text-muted-foreground">{step.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Deadline: {formatDate(step.deadline)}</p>
+                      </div>
+                      {/* Render deliverables for this step */}
+                      <div className="space-y-2">
+                        {deliverables
+                          .filter((d) => d.projectStepId === step.id)
+                          .map((deliverable) => (
+                            <div key={deliverable.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                              <div>
+                                <p className="font-medium">{deliverable.title}</p>
+                                <p className="text-xs text-muted-foreground">Uploaded on {formatDate(deliverable.uploadedAt)}</p>
+                              </div>
+                              <Button variant="outline" size="sm" onClick={() => handleDownload(deliverable)}>
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                      {/* Upload form for this step */}
+                      <form
+                        onSubmit={(e) => handleFileUpload(e, step.id)}
+                        className="p-4 border rounded-lg mt-4 space-y-4"
+                      >
+                        <h5 className="font-medium">Upload New Deliverable</h5>
+                        <div>
+                          <Label htmlFor={`file-${step.id}`}>File (ZIP only)</Label>
+                          <Input
+                            id={`file-${step.id}`}
+                            type="file"
+                            accept=".zip"
+                            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`title-${step.id}`}>Title</Label>
+                          <Input
+                            id={`title-${step.id}`}
+                            value={uploadTitle}
+                            onChange={(e) => setUploadTitle(e.target.value)}
+                            placeholder="Enter deliverable title"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`comment-${step.id}`}>Comment (optional)</Label>
+                          <Textarea
+                            id={`comment-${step.id}`}
+                            value={uploadComment}
+                            onChange={(e) => setUploadComment(e.target.value)}
+                            placeholder="Add any comments"
+                            rows={2}
+                          />
+                        </div>
+                        <Button type="submit" disabled={uploading}>
+                          {uploading ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
+                          ) : (
+                            <><Upload className="h-4 w-4 mr-2" /> Upload for Step {step.stepNumber}</>
+                          )}
+                        </Button>
+                      </form>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No project steps defined.</p>
             )}
           </CardContent>
         </Card>

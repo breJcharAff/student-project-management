@@ -7,7 +7,7 @@ interface ApiResponse<T> {
 }
 
 class ApiClient {
-  private baseUrl = "/api"
+  private baseUrl = ""
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
@@ -21,7 +21,7 @@ class ApiClient {
         headers.Authorization = `Bearer ${token}`
       }
 
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(`/api${endpoint}`, {
         ...options,
         headers,
       })
@@ -72,6 +72,10 @@ class ApiClient {
     })
   }
 
+  async getProjectSteps(projectId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/projectSteps/projects/${projectId}/steps`)
+  }
+
   // Groups
   async getGroups(): Promise<ApiResponse<any[]>> {
     return this.request("/groups")
@@ -89,29 +93,24 @@ class ApiClient {
   }
 
   async joinGroup(groupId: string, students: number[]): Promise<ApiResponse<any>> {
-    return this.request(`/groups/${groupId}/join`, {
+    return this.request(`/groups/${groupId}/students`, {
       method: "POST",
       body: JSON.stringify({ students }),
     })
   }
 
-  async leaveGroup(groupId: string): Promise<ApiResponse<any>> {
-    return this.request(`/groups/${groupId}/leave`, {
+  async leaveGroup(groupId: string, studentIds: number[]): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${groupId}/students/remove`, {
       method: "POST",
-      body: JSON.stringify({ studentIds: [AuthManager.getUser()?.id] }),
+      body: JSON.stringify({ students: studentIds }),
     })
   }
 
   // Deliverables
-  async getGroupDeliverables(groupId: string): Promise<ApiResponse<any[]>> {
-    return this.request(`/deliverables/group/${groupId}`)
-  }
-
-  async uploadDeliverable(groupId: string, formData: FormData): Promise<ApiResponse<any>> {
+  async uploadDeliverable(stepId: string, formData: FormData): Promise<ApiResponse<any>> {
     const token = AuthManager.getToken()
 
-    // Use the correct endpoint with query parameter
-    const response = await fetch(`${this.baseUrl}/deliverables/upload?groupId=${groupId}`, {
+    const response = await fetch(`/api/deliverables/step/${stepId}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -132,7 +131,7 @@ class ApiClient {
   async downloadDeliverable(deliverableId: string): Promise<Blob | null> {
     try {
       const token = AuthManager.getToken()
-      const response = await fetch(`${this.baseUrl}/deliverables/download?deliverableId=${deliverableId}`, {
+      const response = await fetch(`/api/deliverables/${deliverableId}/download`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -153,6 +152,8 @@ class ApiClient {
   async getEvaluations(): Promise<ApiResponse<any[]>> {
     return this.request("/evaluations")
   }
+
+  
 }
 
 export const apiClient = new ApiClient()

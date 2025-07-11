@@ -110,7 +110,7 @@ export default function DashboardPage() {
                                         key={project.id}
                                         title={project.name}
                                         description={project.description}
-                                        groupSize={`${project.minStudentsPerGroup}-${project.maxStudentsPerGroup} students`}
+                                        groupSize={project.minStudentsPerGroup && project.maxStudentsPerGroup ? `${project.minStudentsPerGroup}-${project.maxStudentsPerGroup} students` : 'N/A'}
                                         status="Active"
                                         href={`/dashboard/projects/${project.id}`}
                                     />
