@@ -88,6 +88,10 @@ class ApiClient {
     return this.request("/promotions")
   }
 
+  async getStudentsByPromotion(promotionId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/promotions/${promotionId}/students`)
+  }
+
   async deleteProject(id: string): Promise<ApiResponse<any>> {
     return this.request(`/projects/${id}`, {
       method: "DELETE",
