@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
         console.log("Forwarding login request to backend:", { email: body.email })
 
         // Forward the request to the actual backend - using /auth/login instead of /login
-        const response = await fetch("http://localhost:3000/auth/login", {
+        const response = await fetch("https://pa-backend-ar8v.onrender.com/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

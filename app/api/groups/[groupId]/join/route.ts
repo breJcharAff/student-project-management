@@ -8,7 +8,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
         console.log(`Joining group ${groupId} with data:`, body)
 
-        const response = await fetch(`http://localhost:3000/groups/${groupId}/students`, {
+        const response = await fetch(`https://pa-backend-ar8v.onrender.com/groups/${groupId}/students`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -42,7 +42,7 @@ export default function DashboardSidebar() {
     },
     {
       title: "Promotions",
-      href: "/dashboard/promotions/new",
+      href: "/dashboard/promotions",
       icon: <Users className="h-5 w-5" />,
     },
     {

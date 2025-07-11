@@ -4,7 +4,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     try {
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch(`http://localhost:3000/projects/${(await params).id}`, {
+        const response = await fetch(`https://pa-backend-ar8v.onrender.com/projects/${(await params).id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
