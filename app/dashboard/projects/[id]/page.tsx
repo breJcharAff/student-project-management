@@ -32,10 +32,9 @@ interface Student {
 
 interface Deliverable {
   id: number
-  title: string
-  comment: string
-  path: string
-  uploadedAt: string
+  filename: string
+  submittedAt: string
+  comment: string | null
 }
 
 interface Group {
@@ -204,6 +203,26 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         minute: "2-digit",
       })
     }
+
+    const handleDownload = async (deliverable: Deliverable) => {
+      try {
+        const blob = await apiClient.downloadDeliverable(deliverable.id.toString());
+        if (blob) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = deliverable.filename || 'deliverable.zip';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          setError("Download failed");
+        }
+      } catch (err) {
+        setError("Download failed");
+      }
+    };
 
     const getCriteriaByTarget = (target: string) => {
       return (project.criteria ?? []).filter((c) => c.target?.toLowerCase() === target.toLowerCase())
@@ -431,18 +450,16 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                                             <div className="flex items-center gap-2">
                                               <FileText className="h-4 w-4 text-slate-500"/>
                                               <div>
-                                                <div
-                                                    className="font-medium text-sm">{deliverable.title ?? "No title"}</div>
+                                                <div className="font-medium text-sm">{deliverable.filename ?? "No title"}</div>
                                                 <div className="text-xs text-slate-500">
-                                                  Uploaded {formatDate(deliverable.uploadedAt)}
+                                                  Uploaded {formatDate(deliverable.submittedAt)}
                                                 </div>
                                                 {deliverable.comment && (
-                                                    <div
-                                                        className="text-xs text-slate-600 mt-1">{deliverable.comment}</div>
+                                                    <div className="text-xs text-slate-600 mt-1">{deliverable.comment}</div>
                                                 )}
                                               </div>
                                             </div>
-                                            <Button variant="ghost" size="sm">
+                                            <Button variant="ghost" size="sm" onClick={() => handleDownload(deliverable)}>
                                               <Download className="h-4 w-4"/>
                                             </Button>
                                           </div>
