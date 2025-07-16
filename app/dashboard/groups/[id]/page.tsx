@@ -374,11 +374,6 @@ export default function GroupManagePage() {
             >
               Create Report
             </Button>
-            <Button
-                onClick={() => router.push(`/dashboard/groups/${groupId}/report`)}
-            >
-              Create Report
-            </Button>
           </div>
         </div>
 
