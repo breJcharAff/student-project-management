@@ -355,19 +355,31 @@ export default function GroupManagePage() {
             <h1 className="text-3xl font-bold">{group.name || "Unnamed Group"}</h1>
             <p className="text-muted-foreground">Manage your group and deliverables</p>
           </div>
-          <Button
-              variant="outline"
-              onClick={() =>
-                  router.push(
-                      group.project?.id
-                          ? `/dashboard/projects/${group.project.id}`
-                          : "/dashboard/projects"
-                  )
-              }
-          >
-            <ExternalLink className="h-4 w-4 mr-2" />
-            View Project
-          </Button>
+          <div className="flex gap-2">
+            <Button
+                variant="outline"
+                onClick={() =>
+                    router.push(
+                        group.project?.id
+                            ? `/dashboard/projects/${group.project.id}`
+                            : "/dashboard/projects"
+                    )
+                }
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Project
+            </Button>
+            <Button
+                onClick={() => router.push(`/dashboard/groups/${groupId}/report`)}
+            >
+              Create Report
+            </Button>
+            <Button
+                onClick={() => router.push(`/dashboard/groups/${groupId}/report`)}
+            >
+              Create Report
+            </Button>
+          </div>
         </div>
 
         {/* Alerts */}

@@ -244,7 +244,24 @@ class ApiClient {
     return this.request("/evaluations")
   }
 
-  
+  // Report Parts
+  async createReportPart(groupId: string, data: { title: string; format: string }): Promise<ApiResponse<any>> {
+    return this.request(`/reports/parts/${groupId}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+  }
+
+  async getReportPartsByGroup(groupId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/reports/group/${groupId}`)
+  }
+
+  async updateReportPart(partId: string, data: { content: string; format: string }): Promise<ApiResponse<any>> {
+    return this.request(`/reports/parts/${partId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    })
+  }
 }
 
 export const apiClient = new ApiClient()
