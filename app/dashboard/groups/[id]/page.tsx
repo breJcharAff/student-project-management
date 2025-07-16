@@ -23,7 +23,8 @@ import {
   CheckCircle,
   Loader2,
   LogOut,
-  Award
+  Award,
+  Trash2
 } from "lucide-react"
 import { AuthManager } from "@/lib/auth"
 import { apiClient } from "@/lib/api"
@@ -138,7 +139,13 @@ export default function GroupManagePage() {
           // Continue loading other data even if steps fail
         }
       } else if (!cancelled) {
-        setProjectSteps(stepsResponse.data)
+        const stepsData = stepsResponse.data.map((step: any) => ({
+          ...step,
+          stepNumber: parseInt(step.title.replace(/[^0-9]/g, ''), 10) || step.id,
+          name: step.title,
+          description: step.description || '',
+        }));
+        setProjectSteps(stepsData);
       }
 
       // 3. Fetch deliverables for the project and filter for the current group
@@ -148,8 +155,8 @@ export default function GroupManagePage() {
           setError(projectResponse.error || "Failed to fetch project data")
         }
       } else if (!cancelled) {
-        const allDeliverables = projectResponse.data.groups?.flatMap((g: any) => g.deliverables) || []
-        const groupDeliverables = allDeliverables.filter((d: any) => d.groupId === parseInt(groupId))
+        const currentGroupFromProject = projectResponse.data.groups?.find((g: any) => g.id === parseInt(groupId));
+        const groupDeliverables = currentGroupFromProject?.deliverables || [];
 
         const formattedDeliverables = groupDeliverables.map((d: any) => ({
           ...d,
@@ -201,8 +208,8 @@ export default function GroupManagePage() {
         if (projId) {
           const projectResponse = await apiClient.getProject(projId.toString())
           if (!projectResponse.error && projectResponse.data) {
-            const allDeliverables = projectResponse.data.groups?.flatMap((g: any) => g.deliverables) || []
-            const groupDeliverables = allDeliverables.filter((d: any) => d.groupId === parseInt(groupId))
+            const currentGroupFromProject = projectResponse.data.groups?.find((g: any) => g.id === parseInt(groupId));
+            const groupDeliverables = currentGroupFromProject?.deliverables || [];
 
             const formattedDeliverables = groupDeliverables.map((d: any) => ({
               ...d,
@@ -237,6 +244,43 @@ export default function GroupManagePage() {
       }
     } catch (err) {
       setError("Download failed")
+    }
+  }
+
+  const handleDeleteDeliverable = async (deliverableId: number) => {
+    if (!confirm("Are you sure you want to delete this deliverable? This action cannot be undone.")) {
+      return
+    }
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const response = await apiClient.deleteDeliverable(deliverableId.toString())
+      if (response.error) {
+        setError(response.error)
+      } else {
+        setSuccess("Deliverable deleted successfully!")
+        // Refresh deliverables
+        const projId = group?.project?.id
+        if (projId) {
+          const projectResponse = await apiClient.getProject(projId.toString())
+          if (!projectResponse.error && projectResponse.data) {
+            const currentGroupFromProject = projectResponse.data.groups?.find((g: any) => g.id === parseInt(groupId));
+            const groupDeliverables = currentGroupFromProject?.deliverables || [];
+
+            const formattedDeliverables = groupDeliverables.map((d: any) => ({
+              ...d,
+              uploadedAt: d.uploadedAt || d.submittedAt,
+              title: d.title || d.filename || `Deliverable #${d.id}`,
+            }))
+            setDeliverables(formattedDeliverables)
+          }
+        }
+      }
+    } catch (err) {
+      setError("Failed to delete deliverable.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -444,7 +488,7 @@ export default function GroupManagePage() {
                 <TabsList>
                   {projectSteps.map((step) => (
                     <TabsTrigger key={step.id} value={step.id.toString()}>
-                      Step {step.stepNumber}: {step.name}
+                      Step {step.stepNumber}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -455,23 +499,34 @@ export default function GroupManagePage() {
                         <h4 className="font-medium">{step.name}</h4>
                         <p className="text-sm text-muted-foreground">{step.description}</p>
                         <p className="text-xs text-muted-foreground mt-1">Deadline: {formatDate(step.deadline)}</p>
-                      </div>
-                      {/* Render deliverables for this step */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 mt-4">
+                        <h5 className="font-medium">Uploaded Deliverables:</h5>
                         {deliverables
-                          .filter((d) => d.projectStepId === step.id)
-                          .map((deliverable) => (
-                            <div key={deliverable.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                              <div>
-                                <p className="font-medium">{deliverable.title}</p>
-                                <p className="text-xs text-muted-foreground">Uploaded on {formatDate(deliverable.uploadedAt)}</p>
+                          .filter((d) => d.stepId === step.id)
+                          .length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No deliverables uploaded for this step.</p>
+                        ) : (
+                          deliverables
+                            .filter((d) => d.stepId === step.id)
+                            .map((deliverable) => (
+                              <div key={deliverable.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                                <div>
+                                  <p className="font-medium">{deliverable.title}</p>
+                                  <p className="text-xs text-muted-foreground">Uploaded on {formatDate(deliverable.submittedAt)}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button variant="outline" size="sm" onClick={() => handleDownload(deliverable)}>
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download
+                                  </Button>
+                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteDeliverable(deliverable.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
-                              <Button variant="outline" size="sm" onClick={() => handleDownload(deliverable)}>
-                                <Download className="h-4 w-4 mr-2" />
-                                Download
-                              </Button>
-                            </div>
-                          ))}
+                            ))
+                        )}
+                      </div>
                       </div>
                       {/* Upload form for this step */}
                       <form

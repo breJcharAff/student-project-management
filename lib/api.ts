@@ -143,6 +143,12 @@ class ApiClient {
     })
   }
 
+  async deleteDeliverable(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/deliverables/${id}`, {
+      method: "DELETE",
+    })
+  }
+
   async updateEvaluationGrid(id: string, data: { isFinal: boolean }): Promise<ApiResponse<any>> {
     return this.request(`/evaluation-grids/${id}`, {
       method: "PATCH",
