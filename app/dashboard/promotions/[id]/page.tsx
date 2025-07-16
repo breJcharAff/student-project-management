@@ -92,9 +92,14 @@ export default function PromotionDetailsPage() {
           <h1 className="text-3xl font-bold">Promotion: {promotion.name}</h1>
           <p className="text-muted-foreground">Details for this academic promotion.</p>
         </div>
-        <Button onClick={() => router.push("/dashboard/promotions")} variant="outline">
-          Back to Promotions List
-        </Button>
+        <div className="flex gap-2">
+            <Link href={`/dashboard/promotions/${promotionId}/add-student`}>
+                <Button>Add Students</Button>
+            </Link>
+            <Button onClick={() => router.push("/dashboard/promotions")} variant="outline">
+                Back to Promotions List
+            </Button>
+        </div>
       </div>
 
       {error && (

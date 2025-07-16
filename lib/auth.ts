@@ -41,41 +41,56 @@ export class AuthManager {
             const userData = localStorage.getItem(this.USER_KEY)
             if (userData) {
                 try {
-                    return JSON.parse(userData)
+                    const user = JSON.parse(userData)
+                    console.log("AuthManager: getUser - User data found:", user)
+                    return user
                 } catch (error) {
-                    console.error("Error parsing user data:", error)
-                    this.logout()
+                    console.error("AuthManager: getUser - Error parsing user data:", error)
+                    // Do not logout here, let isAuthenticated handle it
                 }
             }
         }
+        console.log("AuthManager: getUser - No user data found.")
         return null
     }
 
     static getToken(): string | null {
         if (typeof window !== "undefined") {
-            return localStorage.getItem(this.TOKEN_KEY)
+            const token = localStorage.getItem(this.TOKEN_KEY)
+            console.log("AuthManager: getToken - Token found:", !!token)
+            return token
         }
+        console.log("AuthManager: getToken - No window object, returning null.")
         return null
     }
 
     static isAuthenticated(): boolean {
+        console.log("AuthManager: isAuthenticated - Checking authentication status...")
         const user = this.getUser()
         const token = this.getToken()
-        return user !== null && token !== null && !this.isTokenExpired()
+        const tokenExpired = this.isTokenExpired()
+
+        const authenticated = user !== null && token !== null && !tokenExpired
+        console.log("AuthManager: isAuthenticated - Result:", { user: !!user, token: !!token, tokenExpired, authenticated })
+        return authenticated
     }
 
     static isTokenExpired(): boolean {
         const token = this.getToken()
-        if (!token) return true
+        if (!token) {
+            console.log("AuthManager: isTokenExpired - No token, considering expired.")
+            return true
+        }
 
         try {
             // Decode JWT token to check expiration
             const payload = JSON.parse(atob(token.split(".")[1]))
             const currentTime = Date.now() / 1000
-            // Add a 30 second buffer to prevent edge cases
-            return payload.exp < currentTime + 30
+            const expired = payload.exp < currentTime
+            console.log("AuthManager: isTokenExpired - Token expiration check:", { payloadExp: payload.exp, currentTime, expired })
+            return expired
         } catch (error) {
-            console.error("Error decoding token:", error)
+            console.error("AuthManager: isTokenExpired - Error decoding token:", error)
             return true
         }
     }

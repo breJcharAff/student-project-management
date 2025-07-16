@@ -27,15 +27,6 @@ class ApiClient {
       })
 
       if (!response.ok) {
-        // If unauthorized, logout and redirect
-        if (response.status === 401) {
-          AuthManager.logout()
-          if (typeof window !== "undefined") {
-            window.location.href = "/login"
-          }
-          return { error: "Authentication required" }
-        }
-
         const errorData = await response.json().catch(() => ({}))
         return { error: errorData.message || `HTTP ${response.status}` }
       }
@@ -58,6 +49,13 @@ class ApiClient {
     return this.request("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+    })
+  }
+
+  async register(email: string, name: string, password: string, role: string): Promise<ApiResponse<any>> {
+    return this.request("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, name, password, role }),
     })
   }
 
@@ -103,8 +101,40 @@ class ApiClient {
     })
   }
 
+  async addStudentsToPromotion(promotionId: string, studentIds: number[]): Promise<ApiResponse<any>> {
+    return this.request(`/promotions/${promotionId}/students`, {
+      method: "POST",
+      body: JSON.stringify({ studentIds }),
+    })
+  }
+
   async getUsers(): Promise<ApiResponse<any[]>> {
-    return this.request("/users")
+    try {
+      const token = AuthManager.getToken()
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+      if (token) {
+        headers.Authorization = `Bearer ${token}`
+      }
+
+      const response = await fetch(`/api/users`, {
+        method: "GET",
+        headers,
+      })
+
+      if (!response.ok) {
+        // Do NOT logout on 401 for getUsers, just return an error
+        const errorData = await response.json().catch(() => ({}))
+        return { error: errorData.message || `HTTP ${response.status}` }
+      }
+
+      const data = await response.json()
+      return { data }
+    } catch (error) {
+      console.error(`API request failed: /users`, error)
+      return { error: "Network error" }
+    }
   }
 
   async deleteProject(id: string): Promise<ApiResponse<any>> {

@@ -24,20 +24,21 @@ export default function AuthCheck({ children }: AuthCheckProps) {
         const userData = AuthManager.getUser()
         const token = AuthManager.getToken()
 
-        console.log("Auth check results:", { isAuth, userData, hasToken: !!token })
+        console.log("Auth check results:", { isAuth, userData, hasToken: !!token, isTokenExpired: AuthManager.isTokenExpired() })
 
         if (!isAuth) {
-            console.log("Not authenticated, redirecting to login")
-            AuthManager.logout()
+            console.log("AuthCheck: Not authenticated. User:", userData, "Token:", token ? "exists" : "null", "Expired:", AuthManager.isTokenExpired(), "Redirecting to login.")
+            AuthManager.logout() // Ensure localStorage is cleared
             router.push("/login")
             return
         }
 
         if (userData) {
-            console.log("User authenticated:", userData)
+            console.log("AuthCheck: User authenticated:", userData)
             setUser(userData)
         } else {
-            console.log("No user data, redirecting to login")
+            console.log("AuthCheck: No user data found despite being authenticated. This is unexpected. Redirecting to login.")
+            AuthManager.logout() // Clear potentially corrupted state
             router.push("/login")
             return
         }
