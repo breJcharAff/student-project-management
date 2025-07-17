@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import MDEditor from "@uiw/react-md-editor";
 
 // Define types for our data to ensure type safety
 interface Group {
@@ -49,6 +50,8 @@ export default function GradeReportsPage({ params }: { params: { id: string } })
 
     useEffect(() => {
         if (selectedGroup) {
+            setReportParts([]);
+            setSelectedPart(null);
             const fetchReportParts = async () => {
                 try {
                     const response = await apiClient.getReportPartsByGroup(selectedGroup);
@@ -68,24 +71,33 @@ export default function GradeReportsPage({ params }: { params: { id: string } })
     }, [selectedGroup]);
 
     const renderContent = () => {
-        if (loading) return <p>Loading...</p>;
-        if (error) return <p>{error}</p>;
+        // Do not show loading state here, as it's handled globally for the page
+        // and we want to show a message until a group is selected.
+        if (!selectedGroup) {
+            return <p>Please select a group to see the reports.</p>;
+        }
+        
+        if (error) return <p className="text-red-500">{error}</p>;
 
-        const partToDisplay = reportParts.find(part => part.title === selectedPart);
+        if (reportParts.length === 0) {
+            return <p>No report parts found for this group.</p>;
+        }
+
+        const partToDisplay = reportParts.find(part => part.id.toString() === selectedPart);
 
         return (
-            <div>
+            <div className="space-y-4">
                 {selectedPart === "all" ? (
                     reportParts.map(part => (
-                        <div key={part.id}>
-                            <h3>{part.title}</h3>
-                            <div dangerouslySetInnerHTML={{ __html: part.content }} />
+                        <div key={part.id} className="prose dark:prose-invert max-w-none">
+                            <h3 className="font-semibold text-lg border-b pb-2 mb-2">{part.title}</h3>
+                            <MDEditor.Markdown source={part.content} />
                         </div>
                     ))
                 ) : partToDisplay ? (
-                    <div>
-                        <h3>{partToDisplay.title}</h3>
-                        <div dangerouslySetInnerHTML={{ __html: partToDisplay.content }} />
+                    <div className="prose dark:prose-invert max-w-none">
+                        <h3 className="font-semibold text-lg border-b pb-2 mb-2">{partToDisplay.title}</h3>
+                        <MDEditor.Markdown source={partToDisplay.content} />
                     </div>
                 ) : (
                     <p>Select a report part to view its content.</p>
@@ -99,23 +111,30 @@ export default function GradeReportsPage({ params }: { params: { id: string } })
             <h1 className="text-2xl font-bold mb-4">Grade Reports</h1>
             <div className="flex space-x-4 mb-4">
                 <Select onValueChange={setSelectedGroup} value={selectedGroup || ""}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[200px]">
                         <SelectValue placeholder="Select a Group" />
                     </SelectTrigger>
                     <SelectContent>
-                        {groups.map(group => (
-                            <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
-                        ))}
+                        {loading ? (
+                            <SelectItem value="loading" disabled>Loading groups...</SelectItem>
+                        ) : (
+                            groups.map(group => (
+                                <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
+                            ))
+                        )}
                     </SelectContent>
                 </Select>
 
-                <Select onValueChange={setSelectedPart} value={selectedPart || ""} disabled={!selectedGroup}>
-                    <SelectTrigger className="w-[180px]">
+                <Select onValueChange={setSelectedPart} value={selectedPart || ""} disabled={!selectedGroup || reportParts.length === 0}>
+                    <SelectTrigger className="w-[200px]">
                         <SelectValue placeholder="Select a Report Part" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        </SelectContent>
+                        <SelectItem value="all">All Parts</SelectItem>
+                        {reportParts.map(part => (
+                            <SelectItem key={part.id} value={String(part.id)}>{part.title}</SelectItem>
+                        ))}
+                    </SelectContent>
                 </Select>
             </div>
 
