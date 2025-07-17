@@ -30,8 +30,29 @@ import {
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
 import { AuthManager, type User } from "@/lib/auth"
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"
+import {
+    DragDropContext,
+    Draggable,
+    Droppable,
+    type DroppableProps,
+} from "react-beautiful-dnd"
 import { toast } from "sonner"
+
+// Wrapper for react-beautiful-dnd to work with React 18 Strict Mode
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+    const [enabled, setEnabled] = useState(false)
+    useEffect(() => {
+        const animation = requestAnimationFrame(() => setEnabled(true))
+        return () => {
+            cancelAnimationFrame(animation)
+            setEnabled(false)
+        }
+    }, [])
+    if (!enabled) {
+        return null
+    }
+    return <Droppable {...props}>{children}</Droppable>
+}
 
 // Common Interfaces
 interface Student {
@@ -372,7 +393,7 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
                 ) : (
                     <>
                         <DragDropContext onDragEnd={onDragEnd}>
-                            <Droppable droppableId={`groups-${project.id}`}>
+                            <StrictModeDroppable droppableId={`groups-${project.id}`}>
                                 {(provided) => (
                                     <div
                                         {...provided.droppableProps}
@@ -416,7 +437,7 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
                                         {provided.placeholder}
                                     </div>
                                 )}
-                            </Droppable>
+                            </StrictModeDroppable>
                         </DragDropContext>
                         <div className="mt-4 flex justify-end">
                             <Button
