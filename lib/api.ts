@@ -197,6 +197,13 @@ class ApiClient {
     })
   }
 
+  async updateGroupDefenseTime(groupId: string, defenseTime: string | null): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${groupId}/defense`, {
+        method: "PATCH",
+        body: JSON.stringify({ defenseTime }),
+    });
+}
+
   // Deliverables
   async uploadDeliverable(stepId: string, formData: FormData): Promise<ApiResponse<any>> {
     const token = AuthManager.getToken()
@@ -223,6 +230,46 @@ class ApiClient {
     try {
       const token = AuthManager.getToken()
       const response = await fetch(`/api/deliverables/${deliverableId}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      return await response.blob()
+    } catch (error) {
+      console.error("Download failed:", error)
+      return null
+    }
+  }
+
+  async downloadDefenseSchedule(projectId: string): Promise<Blob | null> {
+    try {
+      const token = AuthManager.getToken()
+      const response = await fetch(`/api/projects/${projectId}/defense-pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      return await response.blob()
+    } catch (error) {
+      console.error("Download failed:", error)
+      return null
+    }
+  }
+
+  async downloadAttendance(projectId: string): Promise<Blob | null> {
+    try {
+      const token = AuthManager.getToken()
+      const response = await fetch(`/api/projects/${projectId}/attendance-pdf`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
