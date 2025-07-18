@@ -192,6 +192,7 @@ export default function CreateProjectPage() {
                 >
                   <option value="libre">Libre</option>
                   <option value="manuel">Manuel</option>
+                  <option value="random">Random</option>
                 </select>
               </div>
               {type === "libre" && (
