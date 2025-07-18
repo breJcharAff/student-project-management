@@ -39,6 +39,7 @@ export default function CreateProjectPage() {
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
   const [groupCreationDeadline, setGroupCreationDeadline] = useState("")
   const [isPublished, setIsPublished] = useState(false)
+  const [reportNeeded, setReportNeeded] = useState(false)
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -82,6 +83,7 @@ export default function CreateProjectPage() {
         promotionIds: selectedPromotionIds,
         groupCreationDeadline: type === "libre" ? groupCreationDeadline : null,
         isPublished,
+        reportNeeded,
       }
 
       const response = await apiClient.createProject(payload)
@@ -221,6 +223,14 @@ export default function CreateProjectPage() {
                   onCheckedChange={setIsPublished}
                 />
                 <Label htmlFor="isPublished">Publish Project (Visible to Students)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="reportNeeded"
+                  checked={reportNeeded}
+                  onCheckedChange={setReportNeeded}
+                />
+                <Label htmlFor="reportNeeded">Report Needed</Label>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="defenseDebutDate">Defense Date</Label>
