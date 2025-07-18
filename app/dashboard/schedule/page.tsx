@@ -382,15 +382,18 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
         }
     }
 
-    const formatTime = (time: string | null) => {
-        if (!time) return "To define"
-        const date = new Date(time)
-        if (isNaN(date.getTime())) return "To define"
+    const formatDateTime = (time: string | null) => {
+        if (!time) return "To define";
+        const date = new Date(time);
+        if (isNaN(date.getTime())) return "To define";
 
-        const hours = date.getUTCHours().toString().padStart(2, "0")
-        const minutes = date.getUTCMinutes().toString().padStart(2, "0")
+        const day = date.getUTCDate().toString().padStart(2, '0');
+        const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+        const year = date.getUTCFullYear();
+        const hours = date.getUTCHours().toString().padStart(2, "0");
+        const minutes = date.getUTCMinutes().toString().padStart(2, "0");
 
-        return `${hours}:${minutes} (UTC)`
+        return `${day}/${month}/${year} ${hours}:${minutes} (UTC)`;
     }
 
     return (
@@ -417,7 +420,22 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
                         </Button>
                     </div>
                 </div>
-                <CardDescription>{project.description}</CardDescription>
+                                <CardDescription>
+                    {project.description}
+                    <div className="mt-2 text-sm text-muted-foreground">
+                        {project.defenseDebutDate && (
+                            <p>
+                                <strong>Defense Start:</strong>{' '}
+                                {new Date(project.defenseDebutDate).toLocaleString()}
+                            </p>
+                        )}
+                        {project.defenseDurationInMinutes && (
+                            <p>
+                                <strong>Duration:</strong> {project.defenseDurationInMinutes} minutes
+                            </p>
+                        )}
+                    </div>
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -462,7 +480,7 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
                                                         </div>
                                                         <div className="text-sm font-semibold">
                                                             <Clock className="h-4 w-4 inline-block mr-2" />
-                                                            {formatTime(group.defenseTime)}
+                                                            {formatDateTime(group.defenseTime)}
                                                         </div>
                                                     </div>
                                                 )}
