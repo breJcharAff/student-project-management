@@ -37,6 +37,7 @@ export default function CreateProjectPage() {
   const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(20)
   const [criteria, setCriteria] = useState("") // Comma-separated string
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
+  const [groupCreationDeadline, setGroupCreationDeadline] = useState("")
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -78,6 +79,7 @@ export default function CreateProjectPage() {
         defenseDurationInMinutes,
         criteria: projectCriteria,
         promotionIds: selectedPromotionIds,
+        groupCreationDeadline: type === "libre" ? groupCreationDeadline : null,
       }
 
       const response = await apiClient.createProject(payload)
@@ -190,6 +192,17 @@ export default function CreateProjectPage() {
                   <option value="manuel">Manuel</option>
                 </select>
               </div>
+              {type === "libre" && (
+                <div className="space-y-2">
+                  <Label htmlFor="groupCreationDeadline">Group Creation Deadline</Label>
+                  <Input
+                    id="groupCreationDeadline"
+                    type="datetime-local"
+                    value={groupCreationDeadline}
+                    onChange={(e) => setGroupCreationDeadline(e.target.value)}
+                  />
+                </div>
+              )}
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isGroupBased"
