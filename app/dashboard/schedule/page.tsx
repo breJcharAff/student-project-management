@@ -37,6 +37,8 @@ import {
     type DroppableProps,
 } from "react-beautiful-dnd"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 // Wrapper for react-beautiful-dnd to work with React 18 Strict Mode
 const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
@@ -66,6 +68,8 @@ interface Project {
     id: number
     name: string
     description: string
+    defenseDebutDate: string
+    defenseEndDate: string
     defenseDurationInMinutes: number
     type: string
     createdBy: {
@@ -236,6 +240,9 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
     const [originalSortedGroups, setOriginalSortedGroups] = useState<Group[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isUpdating, setIsUpdating] = useState(false)
+    const [defenseDebutDate, setDefenseDebutDate] = useState("")
+    const [defenseEndDate, setDefenseEndDate] = useState("")
+    const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState(0)
 
     useEffect(() => {
         const fetchFullProject = async () => {
@@ -292,6 +299,32 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
         items.splice(result.destination.index, 0, reorderedItem)
 
         setGroups(items)
+    }
+
+    const handleUpdateDefenseSchedule = async () => {
+        setIsUpdating(true)
+        try {
+            const payload: any = {}
+            if (defenseDebutDate) payload.defenseDebutDate = defenseDebutDate
+            if (defenseEndDate) payload.defenseEndDate = defenseEndDate
+            if (defenseDurationInMinutes) payload.defenseDurationInMinutes = defenseDurationInMinutes
+
+            const response = await apiClient.updateProject(project.id.toString(), payload)
+
+            if (response.error) {
+                toast.error(response.error)
+            } else {
+                toast.success("Defense schedule updated successfully!")
+                const updatedProjectResponse = await apiClient.getProject(project.id.toString())
+                if (updatedProjectResponse.data) {
+                    setProject(updatedProjectResponse.data)
+                }
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update defense schedule.")
+        } finally {
+            setIsUpdating(false)
+        }
     }
 
     const handleValidateOrder = async () => {
@@ -450,6 +483,53 @@ function ProjectScheduleCard({ project: initialProject }: { project: Project }) 
                                 ) : null}
                                 Validate Group Orders
                             </Button>
+                        </div>
+                        <div className="mt-4 pt-4 border-t">
+                            <h3 className="text-lg font-medium">Update Defense Schedule</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor={`defense-start-${project.id}`}>Start Date</Label>
+                                    <Input
+                                        id={`defense-start-${project.id}`}
+                                        type="datetime-local"
+                                        value={defenseDebutDate}
+                                        onChange={(e) => setDefenseDebutDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor={`defense-end-${project.id}`}>End Date</Label>
+                                    <Input
+                                        id={`defense-end-${project.id}`}
+                                        type="datetime-local"
+                                        value={defenseEndDate}
+                                        onChange={(e) => setDefenseEndDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor={`defense-duration-${project.id}`}>
+                                        Duration (minutes)
+                                    </Label>
+                                    <Input
+                                        id={`defense-duration-${project.id}`}
+                                        type="number"
+                                        value={defenseDurationInMinutes}
+                                        onChange={(e) =>
+                                            setDefenseDurationInMinutes(parseInt(e.target.value))
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-4 flex justify-end">
+                                <Button
+                                    onClick={handleUpdateDefenseSchedule}
+                                    disabled={isUpdating || isLoading}
+                                >
+                                    {isUpdating ? (
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : null}
+                                    Validate Date
+                                </Button>
+                            </div>
                         </div>
                     </>
                 )}
