@@ -205,6 +205,12 @@ export default function ManageGroupsPage() {
     !Object.values(pendingGroupChanges).flat().some(s => s.id === student.id)
   )
 
+  const sortedGroups = [...project.groups].sort((a, b) => {
+    const aNum = parseInt(a.name.replace(/\D/g, ''), 10)
+    const bNum = parseInt(b.name.replace(/\D/g, ''), 10)
+    return aNum - bNum
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -255,7 +261,7 @@ export default function ManageGroupsPage() {
             <p className="text-muted-foreground text-center py-4">No groups found for this project.</p>
           ) : (
             <div className="space-y-6">
-              {project.groups.map((group) => (
+              {sortedGroups.map((group) => (
                 <Card key={group.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
