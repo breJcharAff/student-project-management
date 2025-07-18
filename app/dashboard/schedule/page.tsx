@@ -182,6 +182,7 @@ function TeacherScheduleView({
                 const teacherProjects = response.data.filter(
                     (p) => p.createdBy.id === user.id,
                 )
+                teacherProjects.sort((a, b) => a.id - b.id); // Sort projects by ID
                 setProjects(teacherProjects)
             }
             setIsLoading(false)
