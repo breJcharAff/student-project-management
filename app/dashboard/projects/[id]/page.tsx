@@ -73,7 +73,7 @@ interface Project {
   description: string
   minStudentsPerGroup: number
   maxStudentsPerGroup: number
-  defenseDate: string
+  defenseDebutDate: string
   defenseDurationInMinutes: number
   subjectFilename: string | null
   type: string
@@ -293,7 +293,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-500"/>
                   <div>
-                    <div className="font-medium">{formatDate(project.defenseDate)}</div>
+                    <div className="font-medium">{formatDate(project.defenseDebutDate)}</div>
                     <div className="text-sm text-slate-500">{project.defenseDurationInMinutes ?? "??"} minutes each
                     </div>
                   </div>
@@ -617,7 +617,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 <CardHeader>
                   <CardTitle>Defense Sessions</CardTitle>
                   <CardDescription>
-                    {formatDate(project.defenseDate)} - {project.defenseDurationInMinutes} minutes per group
+                    {formatDate(project.defenseDebutDate)} - {project.defenseDurationInMinutes} minutes per group
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

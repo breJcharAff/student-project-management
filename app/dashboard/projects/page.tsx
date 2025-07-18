@@ -21,7 +21,7 @@ interface Project {
         id: number
         name: string
     }>
-    defenseDate?: string
+    defenseDebutDate?: string
     defenseDurationInMinutes?: number
     type?: string
     isGroupBased?: boolean

@@ -33,7 +33,7 @@ export default function CreateProjectPage() {
   const [maxStudentsPerGroup, setMaxStudentsPerGroup] = useState<number>(1)
   const [type, setType] = useState("libre") // Default to 'libre'
   const [isGroupBased, setIsGroupBased] = useState(true)
-  const [defenseDate, setDefenseDate] = useState("")
+  const [defenseDebutDate, setDefenseDate] = useState("")
   const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(20)
   const [criteria, setCriteria] = useState("") // Comma-separated string
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
@@ -74,7 +74,7 @@ export default function CreateProjectPage() {
         maxStudentsPerGroup,
         type,
         isGroupBased,
-        defenseDate: defenseDate || null,
+        defenseDebutDate: defenseDebutDate || null,
         defenseDurationInMinutes,
         criteria: projectCriteria,
         promotionIds: selectedPromotionIds,
@@ -199,11 +199,11 @@ export default function CreateProjectPage() {
                 <Label htmlFor="isGroupBased">Group Based Project</Label>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="defenseDate">Defense Date</Label>
+                <Label htmlFor="defenseDebutDate">Defense Date</Label>
                 <Input
-                  id="defenseDate"
+                  id="defenseDebutDate"
                   type="datetime-local"
-                  value={defenseDate}
+                  value={defenseDebutDate}
                   onChange={(e) => setDefenseDate(e.target.value)}
                 />
               </div>

@@ -35,7 +35,7 @@ interface Project {
     description: string
     minStudentsPerGroup: number
     maxStudentsPerGroup: number
-    defenseDate: string
+    defenseDebutDate: string
     defenseDurationInMinutes: number
     subjectFilename: string | null
     type: string
@@ -267,7 +267,7 @@ export default function GroupsPage() {
                                                                     <Clock className="h-4 w-4 text-slate-500" />
                                                                     <span className="font-medium">Defense Date</span>
                                                                 </div>
-                                                                <div className="text-lg font-semibold">{formatDate(group.project.defenseDate)}</div>
+                                                                <div className="text-lg font-semibold">{formatDate(group.project.defenseDebutDate)}</div>
                                                             </div>
 
                                                             <div className="p-4 bg-slate-50 rounded-lg">

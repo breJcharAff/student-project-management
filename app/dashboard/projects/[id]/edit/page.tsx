@@ -18,7 +18,7 @@ interface Project {
   name: string
   description: string
   isPublished: boolean
-  defenseDate: string
+  defenseDebutDate: string
   defenseDurationInMinutes: number
   promotions: Array<{ id: number; name: string }>
   groups?: Array<{ id: number; isFinal: boolean }>
@@ -44,7 +44,7 @@ export default function EditProjectPage() {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [isPublished, setIsPublished] = useState(false)
-  const [defenseDate, setDefenseDate] = useState("")
+  const [defenseDebutDate, setDefenseDate] = useState("")
   const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(0)
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
   const [isGradesFinalized, setIsGradesFinalized] = useState(false)
@@ -77,7 +77,7 @@ export default function EditProjectPage() {
       setName(fetchedProject.name)
       setDescription(fetchedProject.description)
       setIsPublished(fetchedProject.isPublished)
-      setDefenseDate(fetchedProject.defenseDate ? new Date(fetchedProject.defenseDate).toISOString().slice(0, 16) : "")
+      setDefenseDate(fetchedProject.defenseDebutDate ? new Date(fetchedProject.defenseDebutDate).toISOString().slice(0, 16) : "")
       setDefenseDurationInMinutes(fetchedProject.defenseDurationInMinutes || 0)
       setSelectedPromotionIds(fetchedProject.promotions.map((p: Promotion) => p.id))
 
@@ -118,7 +118,7 @@ export default function EditProjectPage() {
         name,
         description,
         isPublished,
-        defenseDate: defenseDate || null,
+        defenseDebutDate: defenseDebutDate || null,
         defenseDurationInMinutes: defenseDurationInMinutes || null,
         promotionIds: selectedPromotionIds,
       }
@@ -274,11 +274,11 @@ export default function EditProjectPage() {
                 <Label htmlFor="isPublished">Publish Project (Visible to Students)</Label>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="defenseDate">Defense Date</Label>
+                <Label htmlFor="defenseDebutDate">Defense Date</Label>
                 <Input
-                  id="defenseDate"
+                  id="defenseDebutDate"
                   type="datetime-local"
-                  value={defenseDate}
+                  value={defenseDebutDate}
                   onChange={(e) => setDefenseDate(e.target.value)}
                 />
               </div>

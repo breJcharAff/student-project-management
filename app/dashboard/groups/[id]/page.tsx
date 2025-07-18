@@ -42,7 +42,7 @@ interface Group {
     description: string
     minStudentsPerGroup: number
     maxStudentsPerGroup: number
-    defenseDate: string
+    defenseDebutDate: string
     defenseDurationInMinutes: number
     type: string
     isGroupBased: boolean
