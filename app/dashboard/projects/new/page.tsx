@@ -38,6 +38,7 @@ export default function CreateProjectPage() {
   const [criteria, setCriteria] = useState("") // Comma-separated string
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
   const [groupCreationDeadline, setGroupCreationDeadline] = useState("")
+  const [isPublished, setIsPublished] = useState(false)
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -80,6 +81,7 @@ export default function CreateProjectPage() {
         criteria: projectCriteria,
         promotionIds: selectedPromotionIds,
         groupCreationDeadline: type === "libre" ? groupCreationDeadline : null,
+        isPublished,
       }
 
       const response = await apiClient.createProject(payload)
@@ -210,6 +212,14 @@ export default function CreateProjectPage() {
                   onCheckedChange={setIsGroupBased}
                 />
                 <Label htmlFor="isGroupBased">Group Based Project</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isPublished"
+                  checked={isPublished}
+                  onCheckedChange={setIsPublished}
+                />
+                <Label htmlFor="isPublished">Publish Project (Visible to Students)</Label>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="defenseDebutDate">Defense Date</Label>
