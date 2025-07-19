@@ -136,6 +136,16 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             updatedProject = { ...updatedProject, criteria: projectCriteria }
           }
 
+          // Fetch full promotion data to get student lists
+          if (updatedProject.promotions && updatedProject.promotions.length > 0) {
+            const promotionPromises = updatedProject.promotions.map((promo: Promotion) =>
+              apiClient.getPromotion(promo.id.toString())
+            );
+            const promotionResponses = await Promise.all(promotionPromises);
+            const updatedPromotions = promotionResponses.map(res => res.data).filter(Boolean);
+            updatedProject = { ...updatedProject, promotions: updatedPromotions };
+          }
+
           setProject(updatedProject)
         }
       } catch (e: any) {
