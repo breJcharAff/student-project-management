@@ -618,7 +618,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 <h2 className="text-xl font-semibold">Defense Schedule</h2>
                 {userRole === "teacher" && (
                     <Button asChild>
-                      <Link href={`/dashboard/projects/${project.id}/schedule/manage`}>Manage Schedule</Link>
+                      <Link href={`/dashboard/schedule`}>Manage Schedule</Link>
                     </Button>
                 )}
               </div>
