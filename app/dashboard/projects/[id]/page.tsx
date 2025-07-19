@@ -17,6 +17,7 @@ import {
   Target,
   Award,
   Settings,
+  Trash2,
 } from "lucide-react"
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
@@ -83,6 +84,7 @@ interface Project {
   criteria: Criteria[]
   groups: Group[]
   promotions: Promotion[]
+  steps: any[]
 }
 
 interface ProjectPageClientProps {
@@ -91,6 +93,7 @@ interface ProjectPageClientProps {
 
 function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [project, setProject] = useState<Project | null>(null)
+  const [projectSteps, setProjectSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [userRole, setUserRole] = useState<string>("")
@@ -157,8 +160,20 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       }
     }
 
+    const fetchProjectSteps = async () => {
+      try {
+        const response = await apiClient.getProjectSteps(projectId)
+        if (response.data) {
+          setProjectSteps(response.data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch project steps", error)
+      }
+    }
+
     useEffect(() => {
       fetchProject()
+      fetchProjectSteps()
     }, [projectId])
 
     if (isLoading) {
@@ -204,6 +219,15 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         hour: "2-digit",
         minute: "2-digit",
       })
+    }
+
+    const handleDeleteStep = async (stepId: string) => {
+      try {
+        await apiClient.deleteProjectStep(stepId)
+        fetchProjectSteps()
+      } catch (error) {
+        console.error("Failed to delete project step", error)
+      }
     }
 
     const formatTime = (dateString?: string) => {
@@ -351,13 +375,47 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             </Card>
           </div>
 
-          <Tabs defaultValue="groups" className="space-y-4">
+          <Tabs defaultValue="steps" className="space-y-4">
             <TabsList>
+              <TabsTrigger value="steps">Project Steps</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="criteria">Evaluation Criteria</TabsTrigger>
               <TabsTrigger value="promotions">Promotions</TabsTrigger>
               <TabsTrigger value="schedule">Defense Schedule</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="steps" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Project Steps</h2>
+                {userRole === "teacher" && (
+                  <Button asChild>
+                    <Link href={`/dashboard/projects/${project.id}/project-steps`}>Create New Project Step</Link>
+                  </Button>
+                )}
+              </div>
+              <div className="grid gap-4">
+                {projectSteps.map((step) => (
+                  <Card key={step.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle>{step.title}</CardTitle>
+                          <CardDescription>{step.description}</CardDescription>
+                        </div>
+                        {userRole === "teacher" && (
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteStep(step.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p>Deadline: {formatDate(step.deadline)}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
 
             <TabsContent value="groups" className="space-y-4">
               <div className="flex justify-between items-center">

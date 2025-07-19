@@ -167,6 +167,19 @@ class ApiClient {
     return this.request(`/projectSteps/projects/${projectId}/steps`)
   }
 
+  async createProjectSteps(projectId: string, steps: any): Promise<ApiResponse<any>> {
+    return this.request(`/projectSteps/projects/${projectId}/steps`, {
+      method: "POST",
+      body: JSON.stringify(steps),
+    });
+  }
+
+  async deleteProjectStep(stepId: string): Promise<ApiResponse<any>> {
+    return this.request(`/projectSteps/steps/${stepId}`, {
+      method: "DELETE",
+    });
+  }
+
   // Groups
   async getGroups(): Promise<ApiResponse<any[]>> {
     return this.request("/groups")
