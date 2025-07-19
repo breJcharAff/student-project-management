@@ -35,11 +35,7 @@ export default function DashboardSidebar() {
       href: "/dashboard/projects",
       icon: <BookOpen className="h-5 w-5" />,
     },
-    {
-      title: "Classes",
-      href: "/dashboard/classes",
-      icon: <Users className="h-5 w-5" />,
-    },
+    
     {
       title: "Promotions",
       href: "/dashboard/promotions",
