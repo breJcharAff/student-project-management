@@ -23,6 +23,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </body>
     </html>
   )

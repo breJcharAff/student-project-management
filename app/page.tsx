@@ -14,6 +14,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthManager } from "@/lib/auth"
 import { apiClient } from "@/lib/api"
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -27,6 +33,44 @@ export default function LoginPage() {
       router.push("/dashboard")
     }
   }, [router])
+
+  const handleCredentialResponse = async (response: any) => {
+    const idToken = response.credential;
+
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur d’authentification Google");
+
+      console.log("Google login successful, storing auth data:", data);
+      AuthManager.login(data);
+      router.replace("/dashboard");
+
+    } catch (err: any) {
+      console.error("Erreur Google login", err);
+      setError(err.message || "An error occurred during Google login. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.google) {
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+        callback: handleCredentialResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-login-btn")!,
+        { theme: "outline", size: "large" }
+      );
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,10 +110,7 @@ export default function LoginPage() {
           <CardContent>
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" disabled>
-                  <Github className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
+                <div id="google-login-btn"></div>
                 <Button variant="outline" disabled>
                   <Mail className="mr-2 h-4 w-4" />
                   Microsoft
