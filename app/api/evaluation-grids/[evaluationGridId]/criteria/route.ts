@@ -1,16 +1,27 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request, { params }: { params: { evaluationGridId: string } }) {
   const { criteria } = await req.json();
   const { evaluationGridId } = params;
 
-  const updatedCriteria = await prisma.criteria.createMany({
-    data: criteria.map((c: any) => ({
-      ...c,
-      evaluationGridId: Number(evaluationGridId),
-    })),
-  });
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/evaluation-grids/${evaluationGridId}/criteria`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(criteria),
+    });
 
-  return NextResponse.json(updatedCriteria);
+    if (!response.ok) {
+      const errorData = await response.json();
+      return NextResponse.json({ error: errorData.message || "Failed to create criteria" }, { status: response.status });
+    }
+
+    const updatedCriteria = await response.json();
+    return NextResponse.json(updatedCriteria);
+  } catch (error) {
+    console.error("Error creating criteria:", error);
+    return NextResponse.json({ error: "Failed to create criteria" }, { status: 500 });
+  }
 }

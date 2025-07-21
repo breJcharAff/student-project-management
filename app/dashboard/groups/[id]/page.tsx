@@ -464,14 +464,14 @@ export default function GroupManagePage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="font-medium">
+                      <div className="font-medium">
                         {student.name}
                         {student.id === currentUser?.id && (
                             <Badge variant="outline" className="ml-2">
                               You
                             </Badge>
                         )}
-                      </p>
+                      </div>
                       <p className="text-sm text-muted-foreground">{student.email}</p>
                     </div>
                   </div>

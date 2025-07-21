@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-
 export async function DELETE(req: NextRequest, { params }: { params: { stepId: string } }) {
   try {
     const { stepId } = params
 
-    await prisma.projectStep.delete({
-      where: {
-        id: parseInt(stepId),
-      },
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/projectSteps/${stepId}`, {
+      method: "DELETE",
     })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      return NextResponse.json({ error: errorData.message || "Failed to delete project step" }, { status: response.status })
+    }
 
     return NextResponse.json({ message: "Project step deleted successfully" })
   } catch (error) {

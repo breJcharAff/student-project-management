@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, AlertTriangle, CheckCircle, Users as UsersIcon, GraduationCap } from "lucide-react"
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
+import {Loader2, AlertTriangle, CheckCircle, Users as UsersIcon, GraduationCap, Info} from "lucide-react"
 import Link from "next/link"
 import { apiClient } from "@/lib/api"
 import { AuthManager, type User } from "@/lib/auth"
+import {useRouter} from "next/navigation";
 
 interface Promotion {
   id: number
@@ -21,6 +22,7 @@ export default function PromotionsListPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const userData = AuthManager.getUser()
