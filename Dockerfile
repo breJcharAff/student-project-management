@@ -14,6 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copie le reste du code source
 COPY . .
 # Compile la version production de Next.js
+RUN npx prisma generate
 RUN npm run build
 
 # -------- 3. Image d’exécution ----------
