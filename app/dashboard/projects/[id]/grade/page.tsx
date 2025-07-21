@@ -21,6 +21,7 @@ interface Group {
   deliverables: Deliverable[];
   reports: Report[];
   defenseTime: string;
+  students: User[];
 }
 
 interface Deliverable {
@@ -273,6 +274,14 @@ export default function GradeProjectPage() {
       {selectedGroup && (
         <div className="mt-4">
           <h2 className="text-xl font-semibold">Group: {selectedGroup.name}</h2>
+          <div className="mt-2">
+            <h3 className="text-lg font-medium">Students:</h3>
+            <ul className="list-disc pl-5">
+              {selectedGroup.students.map(student => (
+                <li key={student.id}>{student.name}</li>
+              ))}
+            </ul>
+          </div>
           <Tabs defaultValue="deliverables" className="mt-4">
             <TabsList>
               <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
