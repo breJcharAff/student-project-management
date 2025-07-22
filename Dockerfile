@@ -14,7 +14,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copie le reste du code source
 COPY . .
 # Compile la version production de Next.js
-RUN npx prisma generate
 RUN npm run build
 
 # -------- 3. Image d’exécution ----------
@@ -29,7 +28,6 @@ ENV PORT=3000
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY package.json ./
 
 EXPOSE 3000
