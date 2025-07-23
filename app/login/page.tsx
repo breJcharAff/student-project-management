@@ -61,6 +61,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.google) {
+      console.log("Client ID (2):", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
       window.google.accounts.id.initialize({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
         callback: handleCredentialResponse,
