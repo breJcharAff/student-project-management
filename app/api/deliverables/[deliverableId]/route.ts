@@ -5,7 +5,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { deliv
         const { deliverableId } = params
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch(`https://pa-backend-ar8v.onrender.com/deliverables/${deliverableId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/deliverables/${deliverableId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

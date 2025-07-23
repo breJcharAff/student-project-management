@@ -4,7 +4,7 @@ export async function GET(request: NextRequest) {
     try {
         const authHeader = request.headers.get("authorization")
 
-        const response = await fetch("https://pa-backend-ar8v.onrender.com/users", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

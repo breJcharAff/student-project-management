@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json()
 
-        const backendUrl = `https://pa-backend-ar8v.onrender.com/evaluation-grids`
+        const backendUrl = `${process.env.NEXT_PUBLIC_API_URL}/evaluation-grids`
 
         const response = await fetch(backendUrl, {
             method: "POST",

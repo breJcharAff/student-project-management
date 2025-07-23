@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Get the authorization header from the request
     const authHeader = request.headers.get("authorization")
 
-    const response = await fetch(`https://pa-backend-ar8v.onrender.com/groups/${groupId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/groups/${groupId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

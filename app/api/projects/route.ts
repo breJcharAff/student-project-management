@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
         const authHeader = request.headers.get("authorization")
 
         // Forward the request to the backend
-        const response = await fetch("https://pa-backend-ar8v.onrender.com/projects", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         const authHeader = request.headers.get("authorization")
 
         // Forward the request to the actual backend
-        const response = await fetch("https://pa-backend-ar8v.onrender.com/projects", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

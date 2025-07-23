@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Make the request to the backend API
-        const backendUrl = `https://pa-backend-ar8v.onrender.com/deliverables/${groupId}/`
+        const backendUrl = `${process.env.NEXT_PUBLIC_API_URL}/deliverables/${groupId}/`
         console.log("Making request to:", backendUrl)
 
         const response = await fetch(backendUrl, {

@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const authHeader = req.headers.get("authorization")
 
-    const response = await fetch("https://pa-backend-ar8v.onrender.com/auth/register", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

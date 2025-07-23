@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 export async function GET(request: NextRequest) {
     try {
         // Forward the request to the actual backend
-        const response = await fetch("https://pa-backend-ar8v.onrender.com", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
             method: "GET",
         })
 
