@@ -9,13 +9,24 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, CheckCircle, AlertTriangle } from "lucide-react"
+import { Loader2, CheckCircle, AlertTriangle, Trash2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { MultiSelect } from "@/components/ui/multi-select"
 
 interface Promotion {
   id: number
   name: string
+}
+
+interface Criterion {
+  name: string
+  weight: number
+}
+
+interface EvaluationGrid {
+  title: string
+  target: string
+  criteria: Criterion[]
 }
 
 export default function CreateProjectPage() {
@@ -35,11 +46,15 @@ export default function CreateProjectPage() {
   const [isGroupBased, setIsGroupBased] = useState(true)
   const [defenseDebutDate, setDefenseDate] = useState("")
   const [defenseDurationInMinutes, setDefenseDurationInMinutes] = useState<number>(20)
-  const [criteria, setCriteria] = useState("") // Comma-separated string
+  const [reportNeeded, setReportNeeded] = useState(false)
+  const [evaluationGrids, setEvaluationGrids] = useState<Record<string, EvaluationGrid>>({
+    defense: { title: "Grille soutenance", target: "defense", criteria: [] },
+    deliverable: { title: "Grille livrable", target: "deliverable", criteria: [] },
+    report: { title: "Grille rapport", target: "report", criteria: [] },
+  })
   const [selectedPromotionIds, setSelectedPromotionIds] = useState<number[]>([])
   const [groupCreationDeadline, setGroupCreationDeadline] = useState("")
   const [isPublished, setIsPublished] = useState(false)
-  const [reportNeeded, setReportNeeded] = useState(false)
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -68,7 +83,13 @@ export default function CreateProjectPage() {
     setSuccess(null)
 
     try {
-      const projectCriteria = criteria.split(',').map(c => c.trim()).filter(c => c.length > 0)
+      const gridsToSubmit = [
+        evaluationGrids.defense,
+        evaluationGrids.deliverable,
+      ]
+      if (reportNeeded) {
+        gridsToSubmit.push(evaluationGrids.report)
+      }
 
       const payload = {
         name,
@@ -79,7 +100,7 @@ export default function CreateProjectPage() {
         isGroupBased,
         defenseDebutDate: defenseDebutDate || null,
         defenseDurationInMinutes,
-        criteria: projectCriteria,
+        evaluationGrids: gridsToSubmit,
         promotionIds: selectedPromotionIds,
         groupCreationDeadline: type === "libre" ? groupCreationDeadline : null,
         isPublished,
@@ -250,15 +271,44 @@ export default function CreateProjectPage() {
                   onChange={(e) => setDefenseDurationInMinutes(parseInt(e.target.value) || 0)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="criteria">Evaluation Criteria (comma-separated)</Label>
-                <Textarea
-                  id="criteria"
-                  value={criteria}
-                  onChange={(e) => setCriteria(e.target.value)}
-                  placeholder="e.g., Quality, Originality, Presentation"
-                  rows={3}
-                />
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Evaluation Grids</h3>
+                {Object.entries(evaluationGrids).map(([key, grid]) => {
+                  if (key === 'report' && !reportNeeded) return null
+                  return (
+                    <div key={key} className="p-4 border rounded-md">
+                      <h4 className="font-semibold">{grid.title}</h4>
+                      <div className="space-y-2 mt-2">
+                        {grid.criteria.map((c, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                            <span>{c.name} ({c.weight})</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const newGrids = { ...evaluationGrids }
+                                newGrids[key].criteria.splice(index, 1)
+                                setEvaluationGrids(newGrids)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2">
+                        <AddCriteriaForm
+                          onAdd={(criterion) => {
+                            const newGrids = { ...evaluationGrids }
+                            newGrids[key].criteria.push(criterion)
+                            setEvaluationGrids(newGrids)
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="promotions">Associated Promotions</Label>
@@ -283,6 +333,50 @@ export default function CreateProjectPage() {
           </form>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function AddCriteriaForm({ onAdd }: { onAdd: (criterion: Criterion) => void }) {
+  const [name, setName] = useState("")
+  const [weight, setWeight] = useState(0.1)
+  const [showForm, setShowForm] = useState(false)
+
+  const handleAdd = () => {
+    if (name && weight > 0) {
+      onAdd({ name, weight })
+      setName("")
+      setWeight(0.1)
+      setShowForm(false)
+    }
+  }
+
+  if (!showForm) {
+    return (
+      <Button type="button" onClick={() => setShowForm(true)}>
+        Add Criteria
+      </Button>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        type="text"
+        placeholder="Criterion Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <Input
+        type="number"
+        placeholder="Weight"
+        value={weight}
+        onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+        step={0.1}
+        min={0.1}
+      />
+      <Button type="button" onClick={handleAdd}>Add</Button>
+      <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
     </div>
   )
 }
