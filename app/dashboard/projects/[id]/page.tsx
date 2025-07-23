@@ -81,7 +81,6 @@ interface Project {
   isGroupBased: boolean
   evaluationType: string
   createdBy: CreatedBy
-  criteria: Criteria[]
   groups: Group[]
   promotions: Promotion[]
   steps: any[]
@@ -91,9 +90,16 @@ interface ProjectPageClientProps {
   projectId: string
 }
 
+interface EvaluationGrid {
+  id: number
+  target: string
+  criteria: Criteria[]
+}
+
 function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [project, setProject] = useState<Project | null>(null)
   const [projectSteps, setProjectSteps] = useState<any[]>([])
+  const [evaluationGrids, setEvaluationGrids] = useState<EvaluationGrid[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [userRole, setUserRole] = useState<string>("")
@@ -171,9 +177,21 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       }
     }
 
+    const fetchEvaluationGrids = async () => {
+      try {
+        const response = await apiClient.getEvaluationGridsByProject(projectId)
+        if (response.data) {
+          setEvaluationGrids(response.data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch evaluation grids", error)
+      }
+    }
+
     useEffect(() => {
       fetchProject()
       fetchProjectSteps()
+      fetchEvaluationGrids()
     }, [projectId])
 
     if (isLoading) {
@@ -259,7 +277,8 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     };
 
     const getCriteriaByTarget = (target: string) => {
-      return (project.criteria ?? []).filter((c) => c.target?.toLowerCase() === target.toLowerCase())
+      const grid = evaluationGrids.find((g) => g.target?.toLowerCase() === target.toLowerCase())
+      return grid ? grid.criteria : []
     }
 
     const getTotalStudents = () => {

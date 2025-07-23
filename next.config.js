@@ -1,3 +1,5 @@
+console.log("BUILD TIME CLIENT ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {

@@ -170,6 +170,10 @@ class ApiClient {
     })
   }
 
+  async getEvaluationGridsByProject(projectId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/evaluation-grids/project/${projectId}`)
+  }
+
   async getProjectSteps(projectId: string): Promise<ApiResponse<any[]>> {
     return this.request(`/projectSteps/projects/${projectId}/steps`)
   }
