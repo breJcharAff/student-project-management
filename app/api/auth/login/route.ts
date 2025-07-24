@@ -6,7 +6,6 @@ export async function POST(request: NextRequest) {
 
         console.log("Forwarding login request to backend:", { email: body.email })
 
-        // Forward the request to the actual backend - using /auth/login instead of /login
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
             method: "POST",
             headers: {
@@ -17,18 +16,15 @@ export async function POST(request: NextRequest) {
 
         console.log("Backend response status:", response.status, response.statusText)
 
-        // Check the content type to determine how to parse the response
         const contentType = response.headers.get("content-type")
 
         let data
         if (contentType && contentType.includes("application/json")) {
             data = await response.json()
         } else {
-            // If it's not JSON, get the text (likely HTML error page)
             const text = await response.text()
             console.log("Backend returned non-JSON response:", text.substring(0, 200) + "...")
 
-            // Return a structured error response
             return NextResponse.json(
                 {
                     message: response.ok
@@ -39,14 +35,12 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // If the response is not ok, return the error
         if (!response.ok) {
             console.log("Backend returned error:", data)
             return NextResponse.json({ message: data.message || "Authentication failed" }, { status: response.status })
         }
 
         console.log("Login successful:", data)
-        // Return the successful response with token and user data
         return NextResponse.json(data)
     } catch (error) {
         console.error("Login proxy error:", error)

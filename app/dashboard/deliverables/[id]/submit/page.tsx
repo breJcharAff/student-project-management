@@ -21,7 +21,6 @@ export default function SubmitDeliverablePage({ params }: { params: { id: string
     checks: { name: string; passed: boolean }[]
   } | null>(null)
 
-  // This would come from your API based on the deliverable ID
   const deliverable = {
     id: params.id,
     title: "Frontend Prototype",

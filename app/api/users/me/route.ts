@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     const token = authHeader.split(" ")[1];
     let decodedToken: any;
     try {
-      // For simplicity, we are just decoding here. In a real app, you'd verify the token.
       decodedToken = jwt.decode(token);
     } catch (error) {
       console.error("Error decoding token:", error);

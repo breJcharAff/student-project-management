@@ -35,7 +35,7 @@ interface Project {
 export default function ManageGroupsPage() {
   const params = useParams()
   const router = useRouter()
-  const projectId = params.id as string // Changed from params.projectId
+  const projectId = params.id as string
 
   const [project, setProject] = useState<Project | null>(null)
   const [allStudents, setAllStudents] = useState<Student[]>([])
@@ -58,7 +58,6 @@ export default function ManageGroupsPage() {
       const fetchedProject = projectResponse.data
       setProject(fetchedProject)
 
-      // Initialize pendingGroupChanges with current students
       const initialPendingChanges: {[groupId: number]: Student[]} = {}
       fetchedProject.groups.forEach((group: Group) => {
         initialPendingChanges[group.id] = [...group.students]
@@ -95,11 +94,10 @@ export default function ManageGroupsPage() {
       const studentsToAdd = selectedStudentIds.filter(id => !currentStudentsInGroup.some(s => s.id === id))
       const newStudents = [...currentStudentsInGroup, ...studentsToAdd.map(id => allStudents.find(s => s.id === id)!)]
 
-      // Frontend validation for max students
       const maxStudents = project?.maxStudentsPerGroup || Infinity
       if (newStudents.length > maxStudents) {
         setError(`Cannot add students. Group size would exceed maximum of ${maxStudents}.`)
-        return prev // Don't update state if validation fails
+        return prev
       }
 
       return {
@@ -156,7 +154,7 @@ export default function ManageGroupsPage() {
         }
       }
       setSuccess("Group changes saved successfully!")
-      await fetchData() // Re-fetch data to update UI with confirmed changes
+      await fetchData()
     } catch (err: any) {
       setError(err.message || "Failed to save changes.")
     } finally {

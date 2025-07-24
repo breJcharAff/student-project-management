@@ -31,11 +31,9 @@ export default function GroupReportPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  // State for creating a new part
   const [newPartTitle, setNewPartTitle] = useState("")
   const [newPartFormat, setNewPartFormat] = useState("markdown") // Default format
 
-  // State for existing parts
   const [reportParts, setReportParts] = useState<ReportPart[]>([])
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null)
   const [selectedPartContent, setSelectedPartContent] = useState("")
@@ -112,13 +110,13 @@ export default function GroupReportPage() {
     try {
       const response = await apiClient.updateReportPart(selectedPartId, {
         content: selectedPartContent,
-        format: "markdown", // Assuming markdown for now
+        format: "markdown",
       })
       if (response.error) {
         setError(response.error)
       } else {
         setSuccess("Report part content updated successfully!")
-        await fetchReportParts() // Refresh the list of parts
+        await fetchReportParts()
       }
     } catch (err) {
       setError("Failed to update report part content.")

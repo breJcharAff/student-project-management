@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 
-// In a real application, you would fetch this from a database
 const mockReportParts = [
   {
     id: 1,
@@ -36,7 +35,6 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
   try {
     const { groupId } = params
 
-    // Simulate fetching from a database
     const partsForGroup = mockReportParts.filter((part) => part.groupId === groupId)
 
     return NextResponse.json(partsForGroup, { status: 200 })

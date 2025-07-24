@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
             method: "POST",
             headers: {
                 Authorization: authHeader,
-                // Don't set Content-Type for FormData, let fetch handle it
             },
             body: formData,
         })

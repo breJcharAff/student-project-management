@@ -181,8 +181,6 @@ export default function EditProjectPage() {
     setIsGradesFinalized(checked)
   }
 
-  // Determine initial isGradesFinalized state based on the first group's isFinal status
-  // This is now handled by the state variable `isGradesFinalized` and `initialIsGradesFinalized`
 
   if (isLoading) {
     return (

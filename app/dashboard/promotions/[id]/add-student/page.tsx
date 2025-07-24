@@ -29,7 +29,7 @@ interface CreationStatus {
     success: boolean;
     name: string;
     email: string;
-    isNew: boolean; // Add this property
+    isNew: boolean;
 }
 
 export default function AddStudentPage() {

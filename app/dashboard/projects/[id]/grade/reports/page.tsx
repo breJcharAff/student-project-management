@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import MDEditor from "@uiw/react-md-editor";
 
-// Define types for our data to ensure type safety
 interface Group {
     id: number;
     name: string;
@@ -71,8 +70,6 @@ export default function GradeReportsPage({ params }: { params: { id: string } })
     }, [selectedGroup]);
 
     const renderContent = () => {
-        // Do not show loading state here, as it's handled globally for the page
-        // and we want to show a message until a group is selected.
         if (!selectedGroup) {
             return <p>Please select a group to see the reports.</p>;
         }

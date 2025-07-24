@@ -40,7 +40,6 @@ import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-// Wrapper for react-beautiful-dnd to work with React 18 Strict Mode
 const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
     const [enabled, setEnabled] = useState(false)
     useEffect(() => {

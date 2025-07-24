@@ -69,7 +69,7 @@ interface Deliverable {
   comment?: string
   path?: string
   uploadedAt?: string
-  submittedAt?: string // backend format
+  submittedAt?: string
   [key: string]: any
 }
 

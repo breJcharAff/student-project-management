@@ -25,7 +25,7 @@ export default function EditReportPage() {
   }
 
   const handleSave = () => {
-    // Save logic would go here
+
     console.log("Saving report:", content)
   }
 

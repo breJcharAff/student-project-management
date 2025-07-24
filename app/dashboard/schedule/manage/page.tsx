@@ -38,12 +38,11 @@ export default function ManageSchedulePage() {
   ])
 
   const handleDragEnd = (result: any) => {
-    // In a real implementation, this would reorder the schedule
+
     console.log("Drag ended:", result)
   }
 
   const generateSchedule = () => {
-    // In a real implementation, this would generate a schedule based on the inputs
     console.log("Generating schedule with:", { date, startTime, endTime, duration })
   }
 
@@ -258,7 +257,6 @@ export default function ManageSchedulePage() {
   )
 }
 
-// Helper function to calculate end time
 function calculateEndTime(startTime: string, durationMinutes: number): string {
   const [hours, minutes] = startTime.split(":").map(Number)
   const totalMinutes = hours * 60 + minutes + durationMinutes

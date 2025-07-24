@@ -32,9 +32,9 @@ interface Group {
   name: string;
   students: Student[];
   grade: number | null;
-  deliverables?: any[]; // Assuming deliverables exist for filtering
-  reports?: any[]; // Assuming reports exist for filtering
-  defenseTime?: string | null; // Assuming defenseTime exists for filtering
+  deliverables?: any[];
+  reports?: any[];
+  defenseTime?: string | null;
 }
 
 interface Project {
@@ -149,7 +149,7 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
         title: "Evaluation Finalized",
         description: "The evaluation grid has been successfully finalized.",
       });
-      // Refresh evaluation grids after finalization
+
       apiClient.getEvaluationGridsByProject(params.id).then((res) => {
         if (res.data) setEvaluationGrids(res.data);
       });

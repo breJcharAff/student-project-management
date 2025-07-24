@@ -124,11 +124,10 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
 
         if (projectResponse.error) {
           setError(projectResponse.error)
-          setProject(null) // Ensure project is null on error
+          setProject(null)
         } else if (projectResponse.data) {
           let updatedProject = projectResponse.data
 
-          // If the project has groups, fetch one to get min/max students per group
           if (updatedProject.groups && updatedProject.groups.length > 0) {
             const firstGroupId = updatedProject.groups[0].id.toString()
             const groupResponse = await apiClient.getGroup(firstGroupId)
@@ -140,14 +139,12 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
               }
             }
 
-            // Extract criteria from evaluationGrids within groups
             const projectCriteria = updatedProject.groups.flatMap((group: any) =>
               (group.evaluationGrids || []).flatMap((grid: any) => grid.criteria || [])
             )
             updatedProject = { ...updatedProject, criteria: projectCriteria }
           }
 
-          // Fetch full promotion data to get student lists
           if (updatedProject.promotions && updatedProject.promotions.length > 0) {
             const promotionPromises = updatedProject.promotions.map((promo: Promotion) =>
               apiClient.getPromotion(promo.id.toString())
