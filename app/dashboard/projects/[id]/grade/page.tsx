@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
 import { AuthManager, type User } from "@/lib/auth";
+import { toast } from "@/components/ui/use-toast";
 
 // Types
 interface Student {
@@ -75,6 +77,7 @@ interface EvaluationGrid {
 export default function GradeProjectPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = React.use(paramsPromise);
   const [user, setUser] = useState<User | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setUser(AuthManager.getUser());
@@ -82,6 +85,7 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
   const [project, setProject] = useState<Project | null>(null);
   const [evaluationGrids, setEvaluationGrids] = useState<EvaluationGrid[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [globalComment, setGlobalComment] = useState<string>("");
 
   useEffect(() => {
     if (user) {
@@ -135,6 +139,27 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
         });
       })
       .catch(console.error);
+  };
+
+  const handleFinalizeEvaluation = async (evaluationGridId: number, globalComment: string) => {
+    try {
+      await apiClient.finalizeEvaluationGrid(evaluationGridId, { globalComment });
+      toast({
+        title: "Evaluation Finalized",
+        description: "The evaluation grid has been successfully finalized.",
+      });
+      // Refresh evaluation grids after finalization
+      apiClient.getEvaluationGridsByProject(params.id).then((res) => {
+        if (res.data) setEvaluationGrids(res.data);
+      });
+    } catch (error) {
+      console.error("Failed to finalize evaluation grid", error);
+      toast({
+        title: "Error",
+        description: "Failed to finalize evaluation grid.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!project) {
@@ -256,6 +281,25 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
                         selectedGroup={selectedGroup}
                         onAddGrade={handleAddGrade}
                       />
+                      {!grid.isFinal && (
+                        <div className="flex items-end space-x-2 mt-4">
+                          <div className="flex-grow">
+                            <Label htmlFor={`global-comment-${grid.id}`}>Global Comment</Label>
+                            <Input
+                              id={`global-comment-${grid.id}`}
+                              value={globalComment}
+                              onChange={(e) => setGlobalComment(e.target.value)}
+                              placeholder="Add a global comment (optional)"
+                            />
+                          </div>
+                          <Button
+                            onClick={() => handleFinalizeEvaluation(grid.id, globalComment)}
+                            className="w-auto"
+                          >
+                            Finalize Evaluation
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>

@@ -156,6 +156,13 @@ class ApiClient {
     })
   }
 
+  async finalizeEvaluationGrid(evaluationGridId: number, data: { globalComment: string }): Promise<ApiResponse<any>> {
+    return this.request(`/evaluation-grids/finalize/${evaluationGridId}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   async finalizeProjectGrades(projectId: string, isFinal: boolean): Promise<ApiResponse<any>> {
     return this.request(`/projects/${projectId}/finalize`, {
       method: "POST",
