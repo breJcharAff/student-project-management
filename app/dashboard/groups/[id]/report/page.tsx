@@ -12,6 +12,7 @@ import MDEditor from "@uiw/react-md-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
+import Link from "next/link";
 
 interface ReportPart {
   id: number
@@ -136,6 +137,11 @@ export default function GroupReportPage() {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Link href={`/dashboard/groups/${groupId}`}>
+          <Button variant="outline">Back to Group Details</Button>
+        </Link>
+      </div>
       <h1 className="text-3xl font-bold">Manage Group Report</h1>
       <p className="text-muted-foreground">Group ID: {groupId}</p>
 

@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthManager, type User } from "@/lib/auth";
 import { toast } from "@/components/ui/use-toast";
+import Link from "next/link";
 
 // Types
 interface Student {
@@ -168,6 +169,11 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      <div className="mb-4">
+        <Link href={`/dashboard/projects/${params.id}`}>
+          <Button variant="outline">Back to Project</Button>
+        </Link>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">{project.name}</CardTitle>

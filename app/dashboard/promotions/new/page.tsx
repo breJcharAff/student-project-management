@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { MultiSelect } from "@/components/ui/multi-select"
+import Link from "next/link";
 
 interface User {
   id: number
@@ -89,6 +90,11 @@ export default function CreatePromotionPage() {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Link href={`/dashboard/promotions`}>
+          <Button variant="outline">Back to Promotions</Button>
+        </Link>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Create New Promotion</h1>
