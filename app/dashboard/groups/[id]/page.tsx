@@ -93,6 +93,7 @@ export default function GroupManagePage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Upload form state
   const [uploadFile, setUploadFile] = useState<File | null>(null)
@@ -177,16 +178,16 @@ export default function GroupManagePage() {
   // === UPLOAD LOGIC ================
   const handleFileUpload = async (e: React.FormEvent, stepId: number) => {
     e.preventDefault()
+    setUploadError(null) // Clear previous upload errors
     if (!uploadFile || !uploadTitle.trim()) {
-      setError("Please select a file and enter a title")
+      setUploadError("Please select a file and enter a title")
       return
     }
     if (!uploadFile.name.toLowerCase().endsWith(".zip")) {
-      setError("Only ZIP files are allowed")
+      setUploadError("Only ZIP files are allowed")
       return
     }
     setUploading(true)
-    setError(null)
     setSuccess(null)
     try {
       const formData = new FormData()
@@ -196,7 +197,7 @@ export default function GroupManagePage() {
 
       const response = await apiClient.uploadDeliverable(stepId.toString(), formData)
       if (response.error) {
-        setError(response.error)
+        setUploadError(response.error)
       } else {
         setSuccess("Deliverable uploaded successfully!")
         setUploadFile(null)
@@ -221,7 +222,7 @@ export default function GroupManagePage() {
         }
       }
     } catch (err) {
-      setError("Upload failed. Please try again.")
+      setUploadError("Upload failed. Please try again.")
     } finally {
       setUploading(false)
     }
@@ -578,6 +579,12 @@ export default function GroupManagePage() {
                             <><Upload className="h-4 w-4 mr-2" /> Upload for Step {step.stepNumber}</>
                           )}
                         </Button>
+                        {uploadError && (
+                          <Alert variant="destructive" className="mt-4">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>{uploadError}</AlertDescription>
+                          </Alert>
+                        )}
                       </form>
                     </div>
                   </TabsContent>
