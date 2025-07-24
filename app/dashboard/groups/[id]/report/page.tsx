@@ -127,6 +127,34 @@ export default function GroupReportPage() {
     }
   }
 
+  const handleDeletePart = async () => {
+    if (!selectedPartId) {
+      setError("No report part selected for deletion.")
+      return
+    }
+    if (!confirm("Are you sure you want to delete this report part? This action cannot be undone.")) {
+      return
+    }
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const response = await apiClient.deleteReportPart(selectedPartId)
+      if (response.error) {
+        setError(response.error)
+      } else {
+        setSuccess("Report part deleted successfully!")
+        setSelectedPartId(null) // Clear selected part after deletion
+        setSelectedPartContent("")
+        await fetchReportParts() // Refresh the list of parts
+      }
+    } catch (err) {
+      setError("Failed to delete report part.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -233,6 +261,13 @@ export default function GroupReportPage() {
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Updating...</>
                 ) : (
                   "Change Content"
+                )}
+              </Button>
+              <Button onClick={handleDeletePart} disabled={loading} variant="destructive" className="ml-2">
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Deleting...</>
+                ) : (
+                  "Delete Part"
                 )}
               </Button>
             </>

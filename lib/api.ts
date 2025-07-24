@@ -348,6 +348,12 @@ class ApiClient {
     })
   }
 
+  async deleteReportPart(partId: string): Promise<ApiResponse<any>> {
+    return this.request(`/reports/parts/${partId}`, {
+      method: "DELETE",
+    });
+  }
+
   async changePassword(userId: number, oldPassword: string, newPassword: string): Promise<ApiResponse<any>> {
     return this.request(`/users/change-password/${userId}`, {
       method: "POST",
