@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Switch } from "@/components/ui/switch"
+import { Trash2 } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -42,6 +43,12 @@ export default function ProjectStepsPage({ params }: { params: { id: string } })
 
   const handleAddRule = () => {
     setStep({ ...step, rules: [...step.rules, { type: "requiredFile", value: "" }] })
+  }
+
+  const handleRemoveRule = (ruleIndex) => {
+    const newRules = [...step.rules]
+    newRules.splice(ruleIndex, 1)
+    setStep({ ...step, rules: newRules })
   }
 
   const handleSubmit = async () => {
@@ -178,6 +185,9 @@ export default function ProjectStepsPage({ params }: { params: { id: string } })
                   placeholder="Target Filename (e.g., README.md)"
                 />
               )}
+              <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveRule(ruleIndex)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}<Button onClick={() => handleAddRule()} variant="outline">
             Add Rule
