@@ -360,6 +360,27 @@ class ApiClient {
       body: JSON.stringify({ oldPassword, newPassword }),
     });
   }
+
+  async downloadPlagiarismReport(projectId: string): Promise<Blob | null> {
+    try {
+      const token = AuthManager.getToken();
+      const response = await fetch(`/api/plagiarism/projects/${projectId}/plagiarism-report`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      return await response.blob();
+    } catch (error) {
+      console.error("Download plagiarism report failed:", error);
+      throw error; // Re-throw to be caught by the UI component
+    }
+  }
 }
 
 export const apiClient = new ApiClient()

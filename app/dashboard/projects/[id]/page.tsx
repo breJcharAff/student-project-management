@@ -102,6 +102,8 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [evaluationGrids, setEvaluationGrids] = useState<EvaluationGrid[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const [plagiarismError, setPlagiarismError] = useState<string | null>(null)
+  const [isDownloadingPlagiarism, setIsDownloadingPlagiarism] = useState(false)
   const [userRole, setUserRole] = useState<string>("")
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -276,6 +278,30 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       }
     };
 
+    const handleDownloadPlagiarismReport = async () => {
+      setPlagiarismError(null);
+      setIsDownloadingPlagiarism(true);
+      try {
+        const blob = await apiClient.downloadPlagiarismReport(projectId);
+        if (blob) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `plagiarism_report_${project?.name || projectId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          setPlagiarismError("Failed to download plagiarism report.");
+        }
+      } catch (err: any) {
+        setPlagiarismError(err.message || "Failed to download plagiarism report.");
+      } finally {
+        setIsDownloadingPlagiarism(false);
+      }
+    };
+
     const getCriteriaByTarget = (target: string) => {
       const grid = evaluationGrids.find((g) => g.target?.toLowerCase() === target.toLowerCase())
       return grid ? grid.criteria : []
@@ -333,7 +359,17 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                   <Button>
                     <Link href={`/dashboard/projects/${project.id}/grade`}>Grade Project</Link>
                   </Button>
+                  <Button onClick={handleDownloadPlagiarismReport} disabled={isDownloadingPlagiarism}>
+                    {isDownloadingPlagiarism ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Downloading...</>
+                    ) : (
+                      <><Download className="h-4 w-4 mr-2" /> Download Plagiarism Report</>
+                    )}
+                  </Button>
                 </div>
+            )}
+            {plagiarismError && (
+              <div className="text-red-500 text-sm mt-2">{plagiarismError}</div>
             )}
           </div>
 
