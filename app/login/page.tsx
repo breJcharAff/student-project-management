@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Github, Mail, Loader2 } from "lucide-react"
+import Image from "next/image"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthManager } from "@/lib/auth"
 import { apiClient } from "@/lib/api"
@@ -124,6 +125,7 @@ export default function LoginPage() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
+            <Image src="/logo_dropject.png" alt="Dropject Logo" width={154} height={154} className="mx-auto mb-4" />
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
             <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>

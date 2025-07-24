@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ProjectHub - Student Project Management System",
+  title: "Dropject - Student Project Management System",
   description: "A comprehensive platform for managing student projects",
     generator: 'v0.dev'
 }

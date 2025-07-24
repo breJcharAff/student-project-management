@@ -320,7 +320,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             </span>
                 <span className="flex items-center gap-1">
               <Target className="h-4 w-4"/>
-                  {project.evaluationType ?? "N/A"} evaluation
+                  {project.evaluationType ?? "0"} evaluation
             </span>
               </div>
             </div>
@@ -658,7 +658,7 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 <h2 className="text-xl font-semibold">Promotions</h2>
                 {userRole === "teacher" && (
                     <Button asChild>
-                      <Link href={`/dashboard/projects/${project.id}/promotions/manage`}>Manage Promotions</Link>
+                      <Link href={`/dashboard/promotions`}>Manage Promotions</Link>
                     </Button>
                 )}
               </div>

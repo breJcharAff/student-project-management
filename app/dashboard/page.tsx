@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
             <Alert>
                 <Info className="h-4 w-4" />
-                <AlertTitle>Welcome to ProjectHub, {user.name}!</AlertTitle>
+                <AlertTitle>Welcome to Dropject, {user.name}!</AlertTitle>
                 <AlertDescription>
                     {user.role === "teacher"
                         ? "Manage your classes and projects from this dashboard."

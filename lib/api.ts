@@ -347,6 +347,13 @@ class ApiClient {
       body: JSON.stringify(data),
     })
   }
+
+  async changePassword(userId: number, oldPassword: string, newPassword: string): Promise<ApiResponse<any>> {
+    return this.request(`/users/change-password/${userId}`, {
+      method: "POST",
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient()

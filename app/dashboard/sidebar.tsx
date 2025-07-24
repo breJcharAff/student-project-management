@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BookOpen, Calendar, FileText, Home, LayoutDashboard, LogOut, Settings, Users } from "lucide-react"
+import Image from "next/image"
+import { BookOpen, Calendar, FileText, LayoutDashboard, LogOut, Settings, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -110,8 +111,7 @@ export default function DashboardSidebar() {
         <div className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col">
             <div className="p-4 border-b">
                 <Link href="/" className="flex items-center gap-2">
-                    <Home className="h-6 w-6" />
-                    <span className="font-bold text-xl">ProjectHub</span>
+                    <Image src="/logo_dropject.png" alt="Dropject Logo" width={128} height={128} className="mx-auto" />
                 </Link>
             </div>
 
