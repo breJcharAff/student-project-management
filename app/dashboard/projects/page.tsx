@@ -14,8 +14,7 @@ interface Project {
     id: number
     name: string
     description: string
-    minStudentsPerGroup?: number
-    maxStudentsPerGroup?: number
+    groupSize?: string
     createdById: number
     groups?: Array<{
         id: number
@@ -50,34 +49,7 @@ export default function ProjectsListPage() {
                 if (response.error) {
                     setError(response.error)
                 } else if (response.data) {
-                    const projectsWithGroupSize = await Promise.all(
-                        response.data.map(async (project: Project) => {
-                            let projectToProcess = project
-
-                            // If groups are not directly available, fetch full project details
-                            if (!project.groups || project.groups.length === 0) {
-                                const fullProjectResponse = await apiClient.getProject(project.id.toString())
-                                if (!fullProjectResponse.error && fullProjectResponse.data) {
-                                    projectToProcess = fullProjectResponse.data
-                                } else if (fullProjectResponse.error) {
-                                    console.error("Failed to fetch full project details for", project.id, ":", fullProjectResponse.error)
-                                }
-                            }
-
-                            if (projectToProcess.isGroupBased && projectToProcess.groups && projectToProcess.groups.length > 0) {
-                                const groupResponse = await apiClient.getGroup(projectToProcess.groups[0].id.toString())
-                                if (!groupResponse.error && groupResponse.data && groupResponse.data.project) {
-                                    return {
-                                        ...projectToProcess,
-                                        minStudentsPerGroup: groupResponse.data.project.minStudentsPerGroup,
-                                        maxStudentsPerGroup: groupResponse.data.project.maxStudentsPerGroup,
-                                    }
-                                }
-                            }
-                            return projectToProcess
-                        }),
-                    )
-                    setProjects(projectsWithGroupSize)
+                    setProjects(response.data)
                 }
             } catch (e: any) {
                 console.error("Error in fetchProjects:", e)
@@ -169,9 +141,7 @@ function ProjectCard({
                     <div className="flex justify-between text-sm">
                         <span className="text-slate-500">Group Size:</span>
                         <span className="font-medium">
-                            {project.minStudentsPerGroup && project.maxStudentsPerGroup
-                                ? `${project.minStudentsPerGroup}-${project.maxStudentsPerGroup} students`
-                                : 'N/A'}
+                            {project.groupSize || 'N/A'}
                         </span>
                     </div>
                     <div className="flex justify-between text-sm">
