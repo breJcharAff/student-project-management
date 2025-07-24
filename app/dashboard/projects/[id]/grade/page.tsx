@@ -186,7 +186,7 @@ export default function GradeProjectPage({ params: paramsPromise }: { params: Pr
                 <SelectValue placeholder="Select a group" />
               </SelectTrigger>
               <SelectContent>
-                {project.groups.map((group) => (
+                {project.groups.sort((a, b) => a.name.localeCompare(b.name)).map((group) => (
                   <SelectItem key={group.id} value={group.id.toString()}>
                     {group.name}
                   </SelectItem>
