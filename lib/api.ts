@@ -228,6 +228,13 @@ class ApiClient {
     });
 }
 
+  async evaluateGroup(groupId: string, evaluation: any): Promise<ApiResponse<any>> {
+    return this.request(`/groups/${groupId}/evaluate`, {
+      method: "PATCH",
+      body: JSON.stringify(evaluation),
+    });
+  }
+
   // Deliverables
   async uploadDeliverable(stepId: string, formData: FormData): Promise<ApiResponse<any>> {
     const token = AuthManager.getToken()
