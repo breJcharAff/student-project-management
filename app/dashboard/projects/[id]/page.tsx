@@ -629,27 +629,29 @@ function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 </Card>
 
                 {/* Report Criteria */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5"/>
-                      Report Criteria
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {getCriteriaByTarget("report").map((criteria) => (
-                          <div key={criteria.id} className="flex justify-between items-center">
-                            <span className="text-sm">{criteria.name ?? "unnamed criteria"}</span>
-                            <Badge variant="outline">Weight: {criteria.weight ?? 0}</Badge>
-                          </div>
-                      ))}
-                      {getCriteriaByTarget("report").length === 0 && (
-                          <div className="text-sm text-slate-500">No report criteria defined</div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                {project.reportNeeded && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5"/>
+                        Report Criteria
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {getCriteriaByTarget("report").map((criteria) => (
+                            <div key={criteria.id} className="flex justify-between items-center">
+                              <span className="text-sm">{criteria.name ?? "unnamed criteria"}</span>
+                              <Badge variant="outline">Weight: {criteria.weight ?? 0}</Badge>
+                            </div>
+                        ))}
+                        {getCriteriaByTarget("report").length === 0 && (
+                            <div className="text-sm text-slate-500">No report criteria defined</div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </TabsContent>
 
